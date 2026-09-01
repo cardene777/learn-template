@@ -1,12 +1,12 @@
 ---
-id: sample-identity-overview
-permalink: /identity/sample/overview.html
-title: アイデンティティのサンプルノート
-description: Learn Templateの表示・編集を確認するための最小サンプルです。
+id: sample-example-b-overview
+permalink: /example-b/sample/overview.html
+title: サンプルBのノート
+description: Learn Templateの構成確認用に用意した中立なサンプルです。
 type: Note
 order: 10
-domainId: identity
-domainName: アイデンティティ
+domainId: example-b
+domainName: サンプルB
 collectionId: sample
 collectionName: サンプル
 placementLocked: false

@@ -123,6 +123,44 @@ for (const page of filesUnder(path.join(OUT, 'src', 'pages')).filter((file) => f
   }
 }
 
+const privateCategoryIds = ['commerce', 'identity', 'payments'];
+const expectedCategoryIds = ['example-a', 'example-b', 'example-c'];
+for (const category of privateCategoryIds) {
+  if (fs.existsSync(path.join(OUT, 'contents', category))) {
+    throw new Error(`Private category leaked into distribution contents: ${category}`);
+  }
+  if (fs.existsSync(path.join(OUT, 'src', 'pages', category))) {
+    throw new Error(`Private category route leaked into distribution pages: ${category}`);
+  }
+}
+for (const category of expectedCategoryIds) {
+  if (!fs.existsSync(path.join(OUT, 'contents', category, 'sample', 'overview.md'))) {
+    throw new Error(`Generic sample category is missing: ${category}`);
+  }
+  if (!fs.existsSync(path.join(OUT, 'src', 'pages', category, 'index.astro'))) {
+    throw new Error(`Generic sample category route is missing: ${category}`);
+  }
+}
+
+const publicUiFiles = [
+  'src/components/LibraryHeader.astro',
+  'src/components/ArticleHeader.astro',
+  'src/pages/index.astro',
+];
+const privateUiTokens = [
+  '/commerce/', '/identity/', '/payments/',
+  'コマース', 'アイデンティティ', '決済',
+  'AP2、DID、Payment Credential',
+];
+for (const relative of publicUiFiles) {
+  const text = fs.readFileSync(path.join(OUT, relative), 'utf8');
+  for (const token of privateUiTokens) {
+    if (text.includes(token)) {
+      throw new Error(`Private category UI leaked into distribution: ${relative} contains ${token}`);
+    }
+  }
+}
+
 const packageJson = JSON.parse(fs.readFileSync(path.join(OUT, 'package.json'), 'utf8'));
 for (const command of ['template:export', 'template:check']) {
   if (packageJson.scripts?.[command]) {
@@ -144,6 +182,10 @@ if (markdown.length !== 3) {
 }
 if (!markdown.every((file) => path.basename(path.dirname(file)) === 'sample')) {
   throw new Error('Template contents must contain only sample notes');
+}
+const actualCategoryIds = markdown.map((file) => path.basename(path.dirname(path.dirname(file)))).sort();
+if (JSON.stringify(actualCategoryIds) !== JSON.stringify([...expectedCategoryIds].sort())) {
+  throw new Error(`Template sample categories must be generic: ${actualCategoryIds.join(', ')}`);
 }
 
 const changes = fs.readFileSync(path.join(OUT, '_data', 'article_changes.yml'), 'utf8').trim();
@@ -171,4 +213,4 @@ try {
   fs.rmSync(nodeModules, { recursive: true, force: true });
 }
 
-console.log('Distribution template check OK: sanitized sample repository passes public-safety scan, builds, and validates successfully.');
+console.log('Distribution template check OK: generic sanitized sample repository passes public-safety scan, builds, and validates successfully.');

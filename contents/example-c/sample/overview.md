@@ -1,12 +1,12 @@
 ---
-id: sample-payments-overview
-permalink: /payments/sample/overview.html
-title: 決済のサンプルノート
-description: Learn Templateの表示・編集とdetails/code表示を確認するための最小サンプルです。
+id: sample-example-c-overview
+permalink: /example-c/sample/overview.html
+title: サンプルCのノート
+description: Learn Templateの表示・編集とdetails/code表示を確認するための中立なサンプルです。
 type: Note
 order: 10
-domainId: payments
-domainName: 決済
+domainId: example-c
+domainName: サンプルC
 collectionId: sample
 collectionName: サンプル
 placementLocked: false

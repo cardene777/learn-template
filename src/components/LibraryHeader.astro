@@ -6,9 +6,9 @@ const { active = '' } = Astro.props;
   <a class="library-brand" href="/"><img src={icon} alt=""><strong>Learn</strong></a>
   <nav class="library-nav">
     <a class={active === '' ? 'active' : undefined} href="/">Home</a>
-    <a class={active === 'commerce' ? 'active' : undefined} href="/commerce/">コマース</a>
-    <a class={active === 'identity' ? 'active' : undefined} href="/identity/">アイデンティティ</a>
-    <a class={active === 'payments' ? 'active' : undefined} href="/payments/">決済</a>
+    <a class={active === 'example-a' ? 'active' : undefined} href="/example-a/">サンプルA</a>
+    <a class={active === 'example-b' ? 'active' : undefined} href="/example-b/">サンプルB</a>
+    <a class={active === 'example-c' ? 'active' : undefined} href="/example-c/">サンプルC</a>
   </nav>
   <form class="library-header-search" id="header-search-form" action="/" method="get">
     <svg class="library-header-search-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>

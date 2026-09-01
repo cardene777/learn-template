@@ -4,13 +4,14 @@ import re
 
 SOURCE_ROOT = Path('contents')
 OUTPUT_ROOT = Path('_site')
+PAGES_ROOT = Path('src/pages')
 STATIC_PAGES = {
     'index.html',
-    'commerce/index.html',
-    'identity/index.html',
-    'payments/index.html',
     'notes/index.html',
 }
+for route in PAGES_ROOT.glob('*/index.astro'):
+    STATIC_PAGES.add(f'{route.parent.name}/index.html')
+
 FRONT_RE = re.compile(r'^---\n(.*?)\n---(?:\n|$)', re.DOTALL)
 SCALAR_RE = re.compile(r'^([A-Za-z_][A-Za-z0-9_-]*):\s*(.*?)\s*$', re.MULTILINE)
 

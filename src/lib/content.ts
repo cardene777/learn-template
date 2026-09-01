@@ -2,9 +2,9 @@ import fs from 'node:fs';
 import YAML from 'yaml';
 
 export const DOMAINS = {
-  commerce: { id: 'commerce', name: 'コマース', eyebrow: 'COMMERCE' },
-  identity: { id: 'identity', name: 'アイデンティティ', eyebrow: 'IDENTITY' },
-  payments: { id: 'payments', name: '決済', eyebrow: 'PAYMENTS' },
+  'example-a': { id: 'example-a', name: 'サンプルA', eyebrow: 'EXAMPLE A' },
+  'example-b': { id: 'example-b', name: 'サンプルB', eyebrow: 'EXAMPLE B' },
+  'example-c': { id: 'example-c', name: 'サンプルC', eyebrow: 'EXAMPLE C' },
 } as const;
 
 export function permalink(entry: any): string {

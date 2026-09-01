@@ -19,13 +19,13 @@ const searchJson = JSON.stringify(searchItems).replace(/</g, '\\u003c');
 <LibraryLayout title="Learn" active="">
   <main class="library-main">
     <section class="library-hero"><div class="library-eyebrow">HOME</div><h1>技術をリサーチする。</h1>
-      <div class="library-search-wrap"><svg class="library-search-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input class="library-search" id="home-search" type="search" autocomplete="off" placeholder="ノートとDirectoryを検索 — AP2、DID、Payment Credential…" aria-label="ノートとDirectoryを検索"></div>
+      <div class="library-search-wrap"><svg class="library-search-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input class="library-search" id="home-search" type="search" autocomplete="off" placeholder="ノートとDirectoryを検索" aria-label="ノートとDirectoryを検索"></div>
       <div class="library-search-results" id="home-search-results"></div>
     </section>
     <section class="library-section"><div class="library-section-head"><h2>カテゴリから探す</h2></div><div class="library-category-grid">
-      <a class="library-category-card" href="/commerce/"><strong>コマース</strong><span>AgentがSellerのCommerce Stateを扱うProtocol。</span><b>ACP / UCP →</b></a>
-      <a class="library-category-card" href="/identity/"><strong>アイデンティティ</strong><span>Identifier、Credential、本人・Agent確認。</span><b>DID / VC / KYC / KYA →</b></a>
-      <a class="library-category-card" href="/payments/"><strong>決済</strong><span>Agent Payment、HTTP Payment、Payment Processor周辺。</span><b>AP2 / MPP / x402 →</b></a>
+      <a class="library-category-card" href="/example-a/"><strong>サンプルA</strong><span>表示確認用の中立なサンプルカテゴリです。</span><b>Example A →</b></a>
+      <a class="library-category-card" href="/example-b/"><strong>サンプルB</strong><span>自分のテーマへ置き換えるためのサンプルです。</span><b>Example B →</b></a>
+      <a class="library-category-card" href="/example-c/"><strong>サンプルC</strong><span>レイアウトと編集機能の確認用サンプルです。</span><b>Example C →</b></a>
     </div></section>
     <section class="library-section"><div class="library-section-head"><h2>最近確認したノート</h2></div><div class="library-note-grid">
       {recent.map((note: any) => <a class="library-note-card" href={permalink(note)}><span class="library-note-meta">{note.data?.collectionName} · {noteKind(note)}</span><strong>{note.data?.title}</strong><p>{note.data?.description}</p>{(note.data?.reviewed_at || note.data?.reviewed) && <span class="library-note-time">確認 {note.data?.reviewed_at || note.data?.reviewed}</span>}</a>)}
