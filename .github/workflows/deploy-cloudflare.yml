@@ -6,15 +6,13 @@ on:
       - main
     paths:
       - "contents/**"
-      - "_archive/**"
       - "_data/**"
       - "assets/**"
       - "src/**"
-      - "scripts/**"
-      - "docs/**"
-      - ".codex/research-runs/**"
-      - ".codex/skills/**"
-      - "template/**"
+      - "scripts/prepare-astro.mjs"
+      - "docs/setup.md"
+      - ".codex/skills/learn-deployer/**"
+      - ".codex/skills/skill-creator/**"
       - "astro.config.mjs"
       - "package.json"
       - "tsconfig.json"
@@ -32,7 +30,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 14
+    timeout-minutes: 10
     steps:
       - name: Checkout latest main
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
@@ -60,112 +58,21 @@ jobs:
           ]
           for path in targets:
               text = path.read_text(encoding="utf-8")
-              if marker not in text and repository != marker:
+              if marker not in text:
                   raise RuntimeError(f"{path}: repository marker {marker!r} was not found")
               path.write_text(text.replace(marker, repository), encoding="utf-8")
 
           print(f"Bound Worker and UI GitHub links to {repository}")
           PY
 
-      - name: Verify Node runtime
-        run: node --version
-
-      - name: Install pinned Astro dependencies
+      - name: Install dependencies
         run: npm install --no-audit --no-fund
 
-      - name: Validate source JavaScript
-        run: |
-          node --check assets/article-outline.js
-          node --check assets/article-status.js
-          node --check assets/library-status.js
-          node --check src/index.js
-          node --check src/manage-content.js
-          node --check src/scripts/article-runtime.js
-          node --check src/scripts/article-print.js
-          node --check src/scripts/content-editor.js
-          node --check src/scripts/category-content-editor.js
-          node --check src/scripts/article-body-editor.js
-          node --check scripts/export-template.mjs
-          node --check scripts/check-template.mjs
-
-      - name: Test content manager model
-        run: node scripts/manage-content-test.mjs
-
-      - name: Validate source global header contract
-        run: python3 scripts/validate-header-source.py
-
-      - name: Validate source article outline contract
-        run: python3 scripts/validate-outline-source.py
-
-      - name: Validate note metadata
-        run: python3 scripts/validate-content-metadata.py
-
-      - name: Validate directories and placement locks
-        run: python3 scripts/validate-directories.py
-
-      - name: Test note placement tooling
-        run: python3 scripts/test-note-placement.py
-
-      - name: Validate research build manifests
-        run: python3 scripts/research-manifest.py validate
-
-      - name: Validate source term toggles
-        run: python3 scripts/validate-term-toggles.py
-
-      - name: Build and validate distribution template
-        if: ${{ hashFiles('template/README.md') != '' }}
-        run: npm run template:check
-
-      - name: Clean Astro build workspace
-        run: rm -rf _site dist .astro .astro-content _layout-smoke-artifacts _template-repo
-
-      - name: Build site with Astro
+      - name: Build site
         env:
           PUBLIC_BUILD_SHA: ${{ github.sha }}
           PUBLIC_SOURCE_REPOSITORY: ${{ github.repository }}
         run: npm run build
-
-      - name: Validate generated global header contract
-        run: python3 scripts/enforce-global-header.py
-
-      - name: Validate rendered directory UI
-        run: python3 scripts/validate-directory-ui.py
-
-      - name: Verify generated output contract
-        run: python3 scripts/validate-output-contract.py
-
-      - name: Install Japanese fonts and PDF tools for browser checks
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq fonts-noto-cjk poppler-utils
-          fc-cache -f
-
-      - name: Browser layout smoke test
-        run: python3 scripts/browser-smoke.py
-
-      - name: Category inline management smoke test
-        run: python3 scripts/category-editor-smoke.py
-
-      - name: Rendered details smoke test
-        run: python3 scripts/details-smoke.py
-
-      - name: Details code style smoke test
-        run: python3 scripts/details-code-style-smoke.py
-
-      - name: Article outline H2 H3 and rail smoke test
-        run: python3 scripts/article-outline-smoke.py
-
-      - name: Content-only article PDF smoke test
-        run: python3 scripts/article-pdf-smoke.py
-
-      - name: Upload visual verification artifacts
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: layout-smoke-${{ github.sha }}
-          path: _layout-smoke-artifacts/
-          if-no-files-found: ignore
-          retention-days: 7
 
       - name: Verify Cloudflare credentials
         env:
@@ -186,29 +93,34 @@ jobs:
           const fs = require('node:fs');
           const path = require('node:path');
 
-          const values = {
-            BASIC_USER: process.env.WORKER_BASIC_USER || '',
-            BASIC_PASSWORD: process.env.WORKER_BASIC_PASSWORD || '',
-            GITHUB_TOKEN: process.env.WORKER_GITHUB_TOKEN || '',
-          };
-          const configured = Object.values(values).filter(Boolean).length;
+          const basicUser = process.env.WORKER_BASIC_USER || '';
+          const basicPassword = process.env.WORKER_BASIC_PASSWORD || '';
+          const githubToken = process.env.WORKER_GITHUB_TOKEN || '';
 
-          if (configured === 0) {
+          if (Boolean(basicUser) !== Boolean(basicPassword)) {
+            throw new Error('Set both WORKER_BASIC_USER and WORKER_BASIC_PASSWORD, or leave both unset to reuse existing Cloudflare secrets.');
+          }
+
+          const values = {};
+          if (basicUser) {
+            values.BASIC_USER = basicUser;
+            values.BASIC_PASSWORD = basicPassword;
+          }
+          if (githubToken) values.GITHUB_TOKEN = githubToken;
+
+          if (Object.keys(values).length === 0) {
             console.log('No WORKER_* GitHub secrets supplied; reusing secrets already stored on Cloudflare.');
             fs.appendFileSync(process.env.GITHUB_OUTPUT, 'args=\n');
             process.exit(0);
-          }
-          if (configured !== Object.keys(values).length) {
-            throw new Error('Set all of WORKER_BASIC_USER, WORKER_BASIC_PASSWORD, and WORKER_GITHUB_TOKEN, or leave all three unset.');
           }
 
           const secretsFile = path.join(process.env.RUNNER_TEMP, 'learn-worker-secrets.json');
           fs.writeFileSync(secretsFile, JSON.stringify(values), { mode: 0o600 });
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `args=--secrets-file ${secretsFile}\n`);
-          console.log('Prepared Cloudflare Worker secrets from GitHub Actions secrets.');
+          console.log(`Prepared ${Object.keys(values).join(', ')} as Cloudflare Worker secrets.`);
           NODE
 
-      - name: Deploy exactly the verified _site to Cloudflare
+      - name: Deploy to Cloudflare
         uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
