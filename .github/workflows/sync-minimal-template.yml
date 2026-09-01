@@ -1,0 +1,41 @@
+name: Sync minimal sanitized Learn template
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/sync-minimal-template.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout template repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          fetch-depth: 0
+
+      - name: Download verified sanitized export
+        run: |
+          curl --fail --location --retry 3 'https://sdmntprcentralus.oaiusercontent.com/files/00000000-7144-81f5-8061-bc2703480d0c/raw?se=2026-09-01T15%3A02%3A29Z&sp=r&sv=2026-02-06&sr=b&scid=4cca2df5-5000-5f39-b70c-1bad87533d9c&skoid=f5e14fda-2af7-44a3-9d18-d372ffcad871&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-01T01%3A40%3A20Z&ske=2026-09-02T01%3A40%3A20Z&sks=b&skv=2026-02-06&sig=bgoiJlgshQyeZ46qtUrDnO7RmC3qls1liJMT5ua3x/4%3D' -o /tmp/sanitized-learn-template.zip
+          echo 'da1aabc05f67aa3c91490f2f7992d429909504378c24cd8144d0459768b671cf  /tmp/sanitized-learn-template.zip' | sha256sum --check
+
+      - name: Replace repository with minimal non-workflow tree
+        run: |
+          cp .github/workflows/deploy-cloudflare.yml /tmp/deploy-cloudflare.yml
+          cp .github/workflows/sync-minimal-template.yml /tmp/sync-minimal-template.yml
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          unzip -q /tmp/sanitized-learn-template.zip -d .
+          mkdir -p .github/workflows
+          cp /tmp/deploy-cloudflare.yml .github/workflows/deploy-cloudflare.yml
+          cp /tmp/sync-minimal-template.yml .github/workflows/sync-minimal-template.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "sync: minimize public Learn template"
+          git push origin HEAD:main
