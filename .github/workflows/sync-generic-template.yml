@@ -1,0 +1,41 @@
+name: Sync generic sanitized Learn template
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/sync-generic-template.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout template repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          fetch-depth: 0
+
+      - name: Download verified sanitized export
+        run: |
+          curl --fail --location --retry 3 'https://sdmntprnznorth.oaiusercontent.com/files/00000000-8564-820b-957c-ffb60ac0926c/raw?se=2026-09-01T14%3A45%3A59Z&sp=r&sv=2026-02-06&sr=b&scid=e54e8401-6a77-522c-8e99-03070813a8f1&skoid=f5e14fda-2af7-44a3-9d18-d372ffcad871&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-01T01%3A40%3A20Z&ske=2026-09-02T01%3A40%3A20Z&sks=b&skv=2026-02-06&sig=mWb26HPfggcj%2Bg%2BUT9IMb%2BTrVVtOfFKLpFPPI9Orp2I%3D' -o /tmp/sanitized-learn-template.zip
+          echo '4a38b44dcb943b774ea9534cef976d8f58c55d069ea2ec9ed07fe02eed5d7647  /tmp/sanitized-learn-template.zip' | sha256sum --check
+
+      - name: Replace repository with generic sanitized tree
+        run: |
+          cp .github/workflows/sync-generic-template.yml /tmp/sync-generic-template.yml
+          cp .github/workflows/deploy-cloudflare.yml /tmp/deploy-cloudflare.yml
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          unzip -q /tmp/sanitized-learn-template.zip -d .
+          mkdir -p .github/workflows
+          cp /tmp/deploy-cloudflare.yml .github/workflows/deploy-cloudflare.yml
+          cp /tmp/sync-generic-template.yml .github/workflows/sync-generic-template.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "sync: replace private categories with generic samples"
+          git push origin HEAD:main
