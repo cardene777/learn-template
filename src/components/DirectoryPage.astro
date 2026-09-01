@@ -1,0 +1,34 @@
+---
+import LibraryLayout from '../layouts/LibraryLayout.astro';
+import ContentEditor from './ContentEditor.astro';
+import { permalink, sortByOrder, noteKind } from '../lib/content';
+const { entry, entries } = Astro.props;
+const data = entry.data || {};
+const members = sortByOrder(entries.filter((item: any) => item.data?.directoryId === data.id));
+const parent = data.directoryId ? entries.find((item: any) => item.data?.id === data.directoryId) : null;
+const backHref = parent ? permalink(parent) : `/${data.domainId || ''}/`.replace('//', '/');
+const backTitle = parent?.data?.title || data.domainName || 'Home';
+const description = String(data.description || '').replaceAll('Directory', 'まとまり');
+---
+<LibraryLayout title={data.title} active={data.domainId || ''}>
+  <main class="library-main directory-main">
+    <section class="directory-hero">
+      <a class="directory-back" href={backHref}>← {backTitle}</a>
+      {data.sourceLabel && <div class="directory-kicker"><span class="directory-folder-icon" aria-hidden="true"></span>{data.sourceLabel}</div>}
+      <h1>{data.title}</h1>
+      {description && <p>{description}</p>}
+      <div class="directory-meta"><span>{members.length} 項目</span>{data.reviewed_at && <span>確認 {data.reviewed_at}</span>}{data.official && <a href={data.official} target="_blank" rel="noopener">参照資料 ↗</a>}</div>
+      <ContentEditor entry={entry} />
+    </section>
+    <section class="directory-list" aria-label={`${data.title} の一覧`}>
+      {members.map((item: any, index: number) => (
+        <a class:list={['directory-note-row', item.data?.type === 'Directory' && 'library-directory-entry']} href={permalink(item)}>
+          {item.data?.type === 'Directory' ? <span class="directory-folder-icon" aria-hidden="true"></span> : <span class="directory-note-index">{item.data?.chapter || index + 1}</span>}
+          <div class="directory-note-copy">{item.data?.type !== 'Directory' && <span class="library-note-kind">{noteKind(item) === '概要' ? 'ノート' : noteKind(item)}</span>}<strong>{item.data?.title}</strong>{item.data?.description && <p>{String(item.data.description).replaceAll('Directory', 'まとまり')}</p>}</div>
+          <span class="directory-note-go">→</span>
+        </a>
+      ))}
+      {members.length === 0 && <div class="directory-empty">ここにはまだ項目がありません。</div>}
+    </section>
+  </main>
+</LibraryLayout>

@@ -1,0 +1,9 @@
+---
+import { getCollection } from 'astro:content';
+import DirectoryPage from './DirectoryPage.astro';
+const { id } = Astro.props;
+const entries = await getCollection('content');
+const entry = entries.find((item: any) => item.data?.type === 'Directory' && item.data?.id === id);
+if (!entry) throw new Error(`Directory ${id} not found`);
+---
+<DirectoryPage entry={entry} entries={entries} />

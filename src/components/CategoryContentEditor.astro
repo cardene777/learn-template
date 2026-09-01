@@ -1,0 +1,71 @@
+---
+import { sourcePathFromEntry } from '../lib/content';
+import '../styles/category-content-editor.css';
+
+const { domain, entries } = Astro.props;
+const buildSha = import.meta.env.PUBLIC_BUILD_SHA || '';
+const catalog = entries.filter((entry: any) => entry.data?.id).map((entry: any) => ({
+  id: String(entry.data.id),
+  type: String(entry.data.type || 'Note'),
+  title: String(entry.data.title || ''),
+  description: String(entry.data.description || ''),
+  order: Number(entry.data.order || 0),
+  permalink: String(entry.data.permalink || ''),
+  domainId: String(entry.data.domainId || ''),
+  domainName: String(entry.data.domainName || ''),
+  collectionId: entry.data.collectionId ? String(entry.data.collectionId) : '',
+  collectionName: entry.data.collectionName ? String(entry.data.collectionName) : '',
+  directoryId: entry.data.directoryId ? String(entry.data.directoryId) : '',
+  placementLocked: String(entry.data.placementLocked || '').toLowerCase() === 'true',
+  sourcePath: sourcePathFromEntry(entry),
+}));
+---
+<div class="category-editor-toolbar">
+  <button class="category-editor-create" id="category-editor-create-folder" type="button">フォルダ作成</button>
+</div>
+
+<dialog class="category-editor-dialog" id="category-editor-dialog">
+  <div class="category-editor-card">
+    <header><div><span>CONTENT</span><h2 id="category-editor-heading">コンテンツを編集</h2></div><button id="category-editor-close" type="button" aria-label="閉じる">×</button></header>
+    <div class="category-editor-tabs"><button class="active" type="button" data-category-tab="meta">基本情報</button><button type="button" data-category-tab="move">移動</button><button type="button" data-category-tab="delete">削除</button></div>
+    <section data-category-panel="meta">
+      <label>タイトル<input id="category-editor-title" maxlength="180"></label>
+      <label>説明<textarea id="category-editor-description" maxlength="1000"></textarea></label>
+      <label>並び順<input id="category-editor-order" type="number" min="0" max="999999"></label>
+      <div class="category-editor-footer"><span id="category-editor-status"></span><button class="primary" id="category-editor-save-meta" type="button">保存</button></div>
+    </section>
+    <section data-category-panel="move" hidden>
+      <div class="category-editor-lock" id="category-editor-lock" hidden><strong>配置ロック中です。</strong><p>Noteは先にロック解除だけを1Commitで保存してから移動します。</p><button id="category-editor-unlock" type="button">配置ロックを解除</button></div>
+      <label>移動先<select id="category-editor-target"></select></label>
+      <label>並び順<input id="category-editor-move-order" type="number" min="0" max="999999"></label>
+      <label>Source file <small>物理ファイルも移動する時だけ変更</small><input id="category-editor-destination"></label>
+      <div class="category-editor-footer"><span id="category-editor-move-status"></span><button class="primary" id="category-editor-save-move" type="button">移動</button></div>
+    </section>
+    <section data-category-panel="delete" hidden>
+      <div class="category-editor-danger-copy"><strong id="category-editor-delete-title">削除</strong><p id="category-editor-delete-description"></p></div>
+      <label>確認のためID <code id="category-editor-delete-id"></code> を入力<input id="category-editor-delete-confirm" autocomplete="off"></label>
+      <div class="category-editor-footer"><span id="category-editor-delete-status"></span><button class="danger" id="category-editor-delete-save" type="button" disabled>削除する</button></div>
+    </section>
+  </div>
+</dialog>
+
+<dialog class="category-editor-dialog" id="category-editor-create-dialog">
+  <div class="category-editor-card">
+    <header><div><span>FOLDER</span><h2>フォルダを作成</h2></div><button id="category-editor-create-close" type="button" aria-label="閉じる">×</button></header>
+    <section>
+      <label>作成位置 <span class="category-editor-required">必須</span><select id="category-editor-create-location" required></select></label>
+      <label>ID <span class="category-editor-required">必須</span><input id="category-editor-create-id" pattern="[A-Za-z0-9][A-Za-z0-9._-]*" required></label>
+      <label>タイトル <span class="category-editor-required">必須</span><input id="category-editor-create-title" maxlength="180" required></label>
+      <label>説明 <span class="category-editor-required">必須</span><textarea id="category-editor-create-description" maxlength="1000" required></textarea></label>
+      <label>並び順 <span class="category-editor-required">必須</span><input id="category-editor-create-order" type="number" min="0" max="999999" value="10" required></label>
+      <label>URL <span class="category-editor-required">必須</span><input id="category-editor-create-permalink" required></label>
+      <label>Metadata file <span class="category-editor-required">必須</span><input id="category-editor-create-source" required></label>
+      <div class="category-editor-footer"><span id="category-editor-create-status"></span><button class="primary" id="category-editor-create-save" type="button" disabled>作成</button></div>
+    </section>
+  </div>
+</dialog>
+
+<script is:inline type="application/json" id="category-editor-data" set:html={JSON.stringify({ catalog, domain, buildSha }).replace(/</g, '\\u003c')}></script>
+<script>
+  import '../scripts/category-content-editor.js';
+</script>

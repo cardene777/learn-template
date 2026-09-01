@@ -1,0 +1,42 @@
+---
+import '../styles/article-base.css';
+import '../styles/article-shell.css';
+import '../styles/article-print.css';
+import '../../assets/article-overrides.css';
+import '../../assets/article-outline.css';
+import icon from '../../assets/learn-icon.svg?url';
+import ArticleHeader from '../components/ArticleHeader.astro';
+import ContentEditor from '../components/ContentEditor.astro';
+import ArticleBodyEditor from '../components/ArticleBodyEditor.astro';
+import { articleChanges, sourcePathFromEntry } from '../lib/content';
+
+const { entry } = Astro.props;
+const data = entry.data || {};
+const updates = articleChanges()[data.id] || [];
+const sourcePath = sourcePathFromEntry(entry);
+---
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{data.title} · Learn</title>
+  <link rel="icon" href={icon} type="image/svg+xml">
+</head>
+<body>
+  <ArticleHeader active={data.domainId || ''} />
+  <header class="mobile-head"><a class="mobile-home" href="/"><img class="brand-icon" src={icon} alt=""></a><div class="mobile-title">{data.title}</div><button class="menu-btn" id="menu-btn" type="button" aria-label="目次を開く"></button></header>
+  <div class="side-backdrop" id="side-backdrop"></div>
+  <div class="shell"><aside class="side" id="side"><button class="side-close" id="side-close" type="button">×</button><a class="brand" href="/"><img class="brand-icon" src={icon} alt=""><strong>Learn</strong></a><div class="side-title">{data.title}</div><nav class="side-nav" id="side-nav"></nav><div class="back"><a href="/">Libraryへ戻る</a></div></aside>
+  <main class="main"><header class="hero"><h1>{data.title}</h1><p class="lead">{data.description}</p><div class="facts">{data.spec && <span><b>基準仕様</b>{data.spec}</span>}{(data.reviewed_at || data.reviewed) && <span><b>確認日時</b>{data.reviewed_at || data.reviewed}</span>}{data.official && <span><b>公式</b><a href={data.official}>W3C</a></span>}</div><div class="article-export-actions"><ContentEditor entry={entry} /><button class="article-pdf-export" id="article-pdf-export" type="button" aria-label="記事本文をPDFで出力">PDF出力</button></div></header>
+  {updates.length > 0 && <section class="change-history"><div class="change-history-head"><strong>変更履歴</strong><span>{updates.length}件</span></div>{updates.map((update: any, index: number) => <button class="revision-row" type="button" data-revision={index}><span class="revision-date">{update.date}</span><span class="revision-title">{update.title}</span><span class="revision-arrow">›</span></button>)}</section>}
+  <nav class="toc" id="toc"><strong>目次</strong><ul></ul></nav><article class="content" id="content"><ArticleBodyEditor entry={entry} /><div id="article-rendered-body"><slot /></div></article></main></div>
+  {updates.length > 0 && <div class="modal-backdrop" id="revision-modal-backdrop" aria-hidden="true"><section class="revision-modal" role="dialog" aria-modal="true" aria-labelledby="revision-modal-title"><div class="modal-head"><div><div class="modal-date" id="revision-modal-date"></div><div class="modal-title" id="revision-modal-title"></div><p class="modal-summary" id="revision-modal-summary"></p></div><button class="modal-close" id="revision-modal-close" type="button" aria-label="閉じる">×</button></div><div class="modal-body" id="revision-modal-body"></div></section></div>}
+  <script is:inline type="application/json" id="article-updates-json" set:html={JSON.stringify(updates).replace(/</g, '\\u003c')}></script>
+  <script is:inline type="application/json" id="article-meta-json" set:html={JSON.stringify({ path: sourcePath }).replace(/</g, '\\u003c')}></script>
+  <script>import '../scripts/article-runtime.js';</script>
+  <script>import '../scripts/article-print.js';</script>
+  <script>import '../../assets/article-status.js';</script>
+  <script>import '../../assets/article-outline.js';</script>
+</body>
+</html>

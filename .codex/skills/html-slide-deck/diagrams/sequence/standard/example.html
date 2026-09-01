@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Standard Sequence Diagram Example</title>
+<style>
+:root{--paper:#f3efe6;--ink:#171717;--muted:#81776a;--line:#d8d0c2;--red:#9d3d34;--green:#2c5d55}
+*{box-sizing:border-box}body{margin:0;padding:24px;background:#e9e5db;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic UI","Yu Gothic","Noto Sans JP",sans-serif;color:var(--ink)}
+.wrap{max-width:1180px;margin:auto;padding:14px;background:#f8f4ec;border:1px solid #cfc7b8}.slide{display:block;width:100%;height:auto;background:var(--paper);border:1px solid #cfc7b8}
+.header-left{font:850 18px ui-monospace,SFMono-Regular,Menlo,monospace;fill:#151515;letter-spacing:.10em}.header-right{font:750 17px ui-monospace,SFMono-Regular,Menlo,monospace;fill:#8a857b;letter-spacing:.10em}.lead{font-size:25px;font-weight:600;fill:#26231f}.col{font-size:17px;font-weight:750;fill:#8a8175;letter-spacing:.14em}.phase{font-size:16px;font-weight:760;fill:#928779;text-anchor:middle}.step-no{font:850 16px ui-monospace,SFMono-Regular,Menlo,monospace;fill:var(--red)}.step{font-size:16px;font-weight:650;fill:#302b26}.actor{font-size:17px;font-weight:950;text-anchor:middle}.life{stroke:var(--line);stroke-width:1.4;stroke-dasharray:5 5}.row{stroke:#ded5c8;stroke-width:1;stroke-dasharray:4 6}
+.title-html{font-size:64px;font-weight:900;letter-spacing:-.055em;line-height:1.05;color:#151515;white-space:nowrap}.title-band{display:inline;background:linear-gradient(to bottom,transparent 54%,rgba(217,199,149,.86) 54%,rgba(217,199,149,.86) 88%,transparent 88%);box-decoration-break:clone;-webkit-box-decoration-break:clone}
+</style>
+</head>
+<body><div class="wrap">
+<svg id="slide" class="slide" viewBox="0 0 1600 900">
+<defs>
+<marker id="arrowRed" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth"><path d="M2,2 L10,6 L2,10" fill="none" stroke="#9d3d34" stroke-width="1.6"/></marker>
+<marker id="arrowGreen" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth"><path d="M2,2 L10,6 L2,10" fill="none" stroke="#2c5d55" stroke-width="1.6"/></marker>
+</defs>
+<rect width="1600" height="900" fill="#f3efe6"/>
+<text x="80" y="72" class="header-left">04 ／ 全体フロー</text>
+<text x="1520" y="72" class="header-right" text-anchor="end">19 / 20</text>
+<line x1="80" y1="100" x2="1520" y2="100" stroke="#bdb4a5"/>
+<foreignObject x="80" y="128" width="1440" height="92"><div xmlns="http://www.w3.org/1999/xhtml" class="title-html"><span class="title-band">パッケージ購入の場合</span></div></foreignObject>
+<text x="80" y="265" class="lead">旅行会社が売主になる。利用者側は旅行会社へ一括で支払い、旅行会社が各事業者へ支払う。</text>
+<g id="diagram"></g>
+</svg>
+</div>
+<script>
+const DATA={
+  showPhase:true,
+  phases:[
+    {label:"希望",start:0,end:1},{label:"提示",start:2,end:4},{label:"承諾",start:5,end:6},{label:"支払い",start:7,end:11},{label:"成立",start:12,end:13}
+  ],
+  actors:[
+    {title:"利用者",kind:"red"},{title:"ユーザー\nエージェント",kind:"red"},{title:"旅行会社\nエージェント",kind:"red"},{title:"事業者\nエージェント",kind:"green"},{title:"OWS",kind:"green"}
+  ],
+  steps:[
+    {no:"01",text:"希望と条件を入力する",from:0,to:1,mode:"req"},{no:"02",text:"条件を伝えて問い合わせる",from:1,to:2,mode:"req"},{no:"03",text:"空きと価格を問い合わせる",from:2,to:3,mode:"req"},{no:"04",text:"該当プランと価格を返す",from:3,to:2,mode:"res"},{no:"05",text:"パッケージとして提示する",from:2,to:1,mode:"res"},{no:"06",text:"内容を評価する",from:1,to:1,mode:"self"},{no:"07",text:"内容を確認して承諾を得る",from:1,to:0,mode:"res"},{no:"08",text:"署名を依頼する",from:1,to:4,mode:"pay"},{no:"09",text:"署名結果を返す",from:4,to:1,mode:"payRes"},{no:"10",text:"署名済み支払いを送る",from:1,to:2,mode:"pay"},{no:"11",text:"各事業者の予約を確定する",from:2,to:3,mode:"req"},{no:"12",text:"在庫と予約を確定する",from:3,to:3,mode:"selfPay"},{no:"13",text:"予約が確定する",from:3,to:2,mode:"res"},{no:"14",text:"予約の確定を伝える",from:2,to:0,mode:"res"}
+  ]
+};
+const NS="http://www.w3.org/2000/svg",g=document.getElementById("diagram");
+function el(n,a={},p=g){const x=document.createElementNS(NS,n);Object.entries(a).forEach(([k,v])=>v!=null&&x.setAttribute(k,v));p.appendChild(x);return x}
+function text(x,y,s,c,a={}){const t=el("text",{x,y,class:c,...a});t.textContent=s;return t}
+function lines(x,y,s,c,lh=20,a={}){const v=String(s).split("\n"),b=y-(v.length-1)*lh/2;v.forEach((z,i)=>text(x,b+i*lh,z,c,a))}
+function approx(s,px){let n=0;for(const c of String(s))n+=c.charCodeAt(0)<128?px*.56:px;return n}
+const rowOffsets=[];let ry=0;DATA.steps.forEach((s,i)=>{rowOffsets.push(ry);ry+=(s.from===s.to||s.mode.startsWith("self"))&&i<DATA.steps.length-1?34:25});
+const contentY=315,contentH=505,actorH=70,actorGap=44,bottomPad=36,groupH=actorH+actorGap+rowOffsets.at(-1)+bottomPad,actorY=Math.max(contentY,contentY+(contentH-groupH)/2),row0=actorY+actorH+actorGap;
+let phaseW=0;if(DATA.showPhase){phaseW=Math.max(104,Math.min(150,Math.max(...DATA.phases.map(p=>approx(p.label,16)))+38))}
+const stepX=80+phaseW+(DATA.showPhase?14:0),stepW=Math.max(238,Math.min(360,Math.max(...DATA.steps.map(s=>approx(s.text,16)))+62)),actorStart=stepX+stepW+64,actorEnd=1490;
+const actors=DATA.actors.map((a,i)=>{const cx=actorStart+(actorEnd-actorStart)*i/(DATA.actors.length-1),titleW=Math.max(...a.title.split("\n").map(v=>approx(v,17))),w=Math.max(120,Math.min(170,titleW+34));return{...a,cx,w}});
+if(DATA.showPhase)text(80+phaseW/2,row0-34,"フェーズ","col",{"text-anchor":"middle"});text(stepX,row0-34,"手順","col");
+if(DATA.showPhase)DATA.phases.forEach(p=>{const y1=row0+rowOffsets[p.start]-18,y2=row0+rowOffsets[p.end]+18,h=y2-y1;el("rect",{x:80,y:y1,width:phaseW,height:h,fill:"#ebe4d8",stroke:"#d8d0c2"});lines(80+phaseW/2,y1+h/2+5,p.label,"phase",19)});
+DATA.steps.forEach((s,i)=>{const y=row0+rowOffsets[i];el("line",{x1:stepX,y1:y+11,x2:stepX+stepW,y2:y+11,class:"row"});text(stepX+2,y,s.no,"step-no");text(stepX+34,y,s.text,"step")});
+actors.forEach(a=>{el("rect",{x:a.cx-a.w/2,y:actorY,width:a.w,height:actorH,fill:"rgba(255,255,255,.34)",stroke:a.kind==="green"?"#aac1bc":"#d9b5ae","stroke-width":1.4});lines(a.cx,actorY+actorH/2+5,a.title,"actor",20,{fill:a.kind==="green"?"#2c5d55":"#9d3d34"});el("line",{x1:a.cx,y1:actorY+actorH,x2:a.cx,y2:row0+rowOffsets.at(-1)+40,class:"life"})});
+function arrow(s,y){const from=actors[s.from].cx,to=actors[s.to].cx,pay=s.mode==="pay"||s.mode==="payRes"||s.mode==="selfPay",color=pay?"#2c5d55":"#9d3d34",marker=pay?"url(#arrowGreen)":"url(#arrowRed)",dash=s.mode==="res"||s.mode==="payRes"?"6 5":null;if(s.from===s.to||s.mode.startsWith("self")){const x2=from+38,y2=y+13;el("path",{d:`M${from} ${y} L${x2} ${y} L${x2} ${y2} L${from} ${y2}`,stroke:color,"stroke-width":2,fill:"none","marker-end":marker})}else el("path",{d:`M${from} ${y} L${to} ${y}`,stroke:color,"stroke-width":2,fill:"none","stroke-dasharray":dash,"marker-end":marker})}
+DATA.steps.forEach((s,i)=>arrow(s,row0+rowOffsets[i]));
+</script>
+</body></html>

@@ -1,0 +1,19 @@
+---
+import icon from '../../assets/learn-icon.svg?url';
+const { active = '' } = Astro.props;
+---
+<header class="article-library-header"><div class="article-library-header-inner">
+  <a class="article-library-brand" href="/"><img src={icon} alt=""><strong>Learn</strong></a>
+  <nav class="article-library-nav">
+    <a class={active === '' ? 'active' : undefined} href="/">Home</a>
+    <a class={active === 'commerce' ? 'active' : undefined} href="/commerce/">コマース</a>
+    <a class={active === 'identity' ? 'active' : undefined} href="/identity/">アイデンティティ</a>
+    <a class={active === 'payments' ? 'active' : undefined} href="/payments/">決済</a>
+  </nav>
+  <form class="article-library-header-search" action="/" method="get">
+    <svg class="article-library-header-search-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <input name="q" type="search" autocomplete="off" placeholder="全記事を検索" aria-label="全記事を検索">
+  </form>
+  <a class="article-library-github-link" href="https://github.com/__LEARN_REPOSITORY__" target="_blank" rel="noreferrer" aria-label="GitHub repository" title="GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.64 0 8.13c0 3.59 2.29 6.64 5.47 7.71.4.08.55-.18.55-.39 0-.19-.01-.83-.01-1.51-2.23.49-2.69-.97-2.69-.97-.36-.93-.88-1.18-.88-1.18-.72-.5.05-.49.05-.49.8.06 1.22.83 1.22.83.71 1.23 1.87.88 2.33.67.07-.52.28-.88.51-1.08-1.78-.2-3.65-.9-3.65-4 0-.88.31-1.6.82-2.17-.08-.2-.36-1.03.08-2.14 0 0 .67-.22 2.2.83A7.4 7.4 0 0 1 8 3.93a7.3 7.3 0 0 1 2 .27c1.53-1.05 2.2-.83 2.2-.83.44 1.11.16 1.94.08 2.14.51.57.82 1.29.82 2.17 0 3.11-1.87 3.79-3.65 3.99.29.25.54.73.54 1.48 0 1.08-.01 1.95-.01 2.22 0 .21.15.47.55.39A8.16 8.16 0 0 0 16 8.13C16 3.64 12.42 0 8 0Z"/></svg></a>
+  <a class="article-library-deploy-status" id="article-library-deploy-status" href="https://github.com/__LEARN_REPOSITORY__/actions/workflows/deploy-cloudflare.yml" target="_blank" rel="noreferrer"><span class="article-library-deploy-dot"></span><span class="article-library-deploy-text">状態確認中</span></a>
+</div></header>

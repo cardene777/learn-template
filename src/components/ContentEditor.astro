@@ -1,0 +1,52 @@
+---
+import { getCollection } from 'astro:content';
+import { sourcePathFromEntry } from '../lib/content';
+import '../styles/content-editor.css';
+const { entry } = Astro.props;
+const data = entry.data || {};
+const entries = (await getCollection('content')).filter((item: any) => item.data?.id);
+const currentPath = sourcePathFromEntry(entry);
+const buildSha = import.meta.env.PUBLIC_BUILD_SHA || '';
+const catalog = entries.map((item: any) => ({id:String(item.data.id),type:String(item.data.type||'Note'),title:String(item.data.title||''),description:String(item.data.description||''),order:Number(item.data.order||0),permalink:String(item.data.permalink||''),domainId:String(item.data.domainId||''),domainName:String(item.data.domainName||''),collectionId:item.data.collectionId?String(item.data.collectionId):'',collectionName:item.data.collectionName?String(item.data.collectionName):'',directoryId:item.data.directoryId?String(item.data.directoryId):'',placementLocked:String(item.data.placementLocked||'').toLowerCase()==='true',sourcePath:sourcePathFromEntry(item)}));
+const current = catalog.find((item: any) => item.sourcePath === currentPath);
+const directChildren = current ? catalog.filter((item: any) => item.directoryId === current.id).length : 0;
+---
+<div class="content-editor-actions">
+  <button class="content-editor-button" id="content-editor-open" type="button">{data.type==='Directory'?'編集':'タイトル編集'}</button>
+  {data.type!=='Directory'&&<button class="content-editor-button content-editor-mode-button" id="article-edit-mode" type="button" aria-pressed="false">本文編集</button>}
+  {data.type==='Directory'&&<button class="content-editor-button" id="content-editor-create-child" type="button">子フォルダ作成</button>}
+</div>
+<dialog class="content-editor-dialog" id="content-editor-dialog">
+  <div class="content-editor-card">
+    <header><div><span>CONTENT</span><h2>{data.type==='Directory'?'フォルダを編集':'タイトル・情報を編集'}</h2></div><button id="content-editor-close" type="button" aria-label="閉じる">×</button></header>
+    <div class="content-editor-tabs">
+      <button class="active" type="button" data-editor-tab="meta">基本情報</button>
+      <button type="button" data-editor-tab="move">移動</button>
+    </div>
+    <section data-editor-panel="meta">
+      <label>タイトル<input id="content-editor-title" maxlength="180"></label>
+      <label>説明<textarea id="content-editor-description" maxlength="1000"></textarea></label>
+      <label>並び順<input id="content-editor-order" type="number" min="0" max="999999"></label>
+      <div class="content-editor-footer"><span id="content-editor-status"></span><button class="primary" id="content-editor-save-meta" type="button">保存</button></div>
+      <div class="content-editor-danger"><div><strong>削除</strong><p>{data.type==='Directory'?(directChildren>0?`子要素が ${directChildren} 件あります。空にしてから削除できます。`:'このフォルダと対応するRouteを削除します。'):(current?.placementLocked?'配置ロックを解除してから削除できます。':'このNoteのMarkdownを削除します。')}</p></div><button id="content-editor-delete-open" type="button" disabled={(data.type==='Directory'&&directChildren>0)||Boolean(current?.placementLocked)}>削除</button></div>
+    </section>
+    <section data-editor-panel="move" hidden>
+      <div class="content-editor-lock" id="content-editor-lock" hidden><strong>配置ロック中です。</strong><p>Noteの移動前にロック解除Commitが必要です。</p><button id="content-editor-unlock" type="button">配置ロックを解除</button></div>
+      <label>移動先<select id="content-editor-target"></select></label>
+      <label>並び順<input id="content-editor-move-order" type="number" min="0" max="999999"></label>
+      <label>Source file <small>物理ファイルも移動する時だけ変更</small><input id="content-editor-destination"></label>
+      <div class="content-editor-footer"><span id="content-editor-move-status"></span><button class="primary" id="content-editor-save-move" type="button">移動</button></div>
+    </section>
+  </div>
+</dialog>
+<dialog class="content-editor-dialog" id="content-editor-delete-dialog"><div class="content-editor-card content-editor-delete-card"><header><div><span>DELETE</span><h2>{data.type==='Directory'?'フォルダを削除':'Noteを削除'}</h2></div><button id="content-editor-delete-close" type="button" aria-label="閉じる">×</button></header><section><p class="content-editor-delete-warning">この操作はGitHubの<code>main</code>へ削除Commitを作成します。元に戻すにはGit履歴から復元が必要です。</p><label>確認のためID <code>{current?.id}</code> を入力<input id="content-editor-delete-confirm" autocomplete="off"></label><div class="content-editor-footer"><span id="content-editor-delete-status"></span><button class="danger" id="content-editor-delete-save" type="button" disabled>削除する</button></div></section></div></dialog>
+{data.type==='Directory'&&<dialog class="content-editor-dialog" id="content-editor-create-dialog"><div class="content-editor-card"><header><div><span>FOLDER</span><h2>子フォルダを作成</h2></div><button id="content-editor-create-close" type="button" aria-label="閉じる">×</button></header><section>
+  <label>ID <span class="content-editor-required">必須</span><input id="content-editor-create-id" pattern="[A-Za-z0-9][A-Za-z0-9._-]*" required></label>
+  <label>タイトル <span class="content-editor-required">必須</span><input id="content-editor-create-title" maxlength="180" required></label>
+  <label>説明 <span class="content-editor-required">必須</span><textarea id="content-editor-create-description" maxlength="1000" required></textarea></label>
+  <label>並び順 <span class="content-editor-required">必須</span><input id="content-editor-create-order" type="number" min="0" max="999999" value="10" required></label>
+  <label>URL <span class="content-editor-required">必須</span><input id="content-editor-create-permalink" required></label>
+  <label>Metadata file <span class="content-editor-required">必須</span><input id="content-editor-create-source" required></label>
+  <div class="content-editor-footer"><span id="content-editor-create-status"></span><button class="primary" id="content-editor-create-save" type="button" disabled>作成</button></div>
+</section></div></dialog>}
+<script is:inline type="application/json" id="content-editor-data" set:html={JSON.stringify({current,catalog,directChildren,buildSha}).replace(/</g,'\\u003c')}></script><script>import '../scripts/content-editor.js';</script>

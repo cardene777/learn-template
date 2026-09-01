@@ -1,0 +1,15 @@
+.DS_Store
+node_modules/
+dist/
+_site/
+.astro/
+.astro-content/
+_layout-smoke-artifacts/
+_template-repo/
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+.wrangler/
+*.secrets.json

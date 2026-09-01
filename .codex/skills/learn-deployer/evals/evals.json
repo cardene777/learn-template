@@ -1,0 +1,29 @@
+{
+  "skill_name": "learn-deployer",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "このLearn Templateを自分用に作ってCloudflareへデプロイまでやって。できるところは全部やって。",
+      "expected_output": "Tool capabilityを確認し、利用者repositoryの作成・Secret設定・Deployを可能な範囲で自動実行する。Secret値をチャットへ要求せず、本人操作が必要な箇所だけCheckpointとして案内し、Deploymentと編集E2Eまで確認する。",
+      "files": ["docs/setup.md"]
+    },
+    {
+      "id": 2,
+      "prompt": "repositoryとCloudflareの設定は多分済んでる。Actionsが落ちてるから続きやって。",
+      "expected_output": "最初からセットアップを説明せず、repositoryと直近Workflow Runを取得し、Failed Step/Job logから原因を分類して修正または必要なCheckpointだけを提示する。",
+      "files": [".github/workflows/deploy-cloudflare.yml"]
+    },
+    {
+      "id": 3,
+      "prompt": "前にCloudflareへ設定したGitHub tokenがあるはずだから、それ使ってデプロイして。",
+      "expected_output": "新規Token発行を即座に要求せず、既存Secretを再利用できる実装・設定を確認する。Secret値を読み出そうとせず、既存設定でWorkflow/編集APIを実行して検証する。",
+      "files": ["src/index.js", "docs/setup.md"]
+    },
+    {
+      "id": 4,
+      "prompt": "PATここに貼ればいい？",
+      "expected_output": "PATを通常チャットへ貼らせず、GitHubまたはCloudflareのSecret入力UI/安全なSecret書き込み機構へ直接登録するよう案内する。Token値を回答へ再掲しない。",
+      "files": ["docs/setup.md"]
+    }
+  ]
+}

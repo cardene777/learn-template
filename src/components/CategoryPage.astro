@@ -1,0 +1,40 @@
+---
+import LibraryLayout from '../layouts/LibraryLayout.astro';
+import CategoryContentEditor from './CategoryContentEditor.astro';
+import { DOMAINS, permalink, sortByOrder, noteKind, sourcePathFromEntry } from '../lib/content';
+const { domain, entries } = Astro.props;
+const info = DOMAINS[domain as keyof typeof DOMAINS];
+if (!info) throw new Error(`Unknown domain: ${domain}`);
+
+const domainEntries = entries.filter((entry: any) => entry.data?.domainId === domain);
+const notes = domainEntries.filter((entry: any) => entry.data?.type !== 'Directory');
+const rootNotes = sortByOrder(notes.filter((entry: any) => !entry.data?.directoryId && !entry.data?.collectionId));
+const collectionNotes = notes.filter((entry: any) => entry.data?.collectionId);
+const rootDirectories = domainEntries.filter((entry: any) => entry.data?.type === 'Directory' && !entry.data?.directoryId);
+const collectionItems = sortByOrder([...collectionNotes, ...rootDirectories]);
+const groups = new Map<string, any[]>();
+for (const item of collectionItems) {
+  const name = String(item.data?.collectionName || 'その他');
+  if (!groups.has(name)) groups.set(name, []);
+  groups.get(name)!.push(item);
+}
+const collections = [...groups.entries()];
+const bodyEditHref = (item: any) => `${permalink(item)}?edit=body`;
+---
+<LibraryLayout title={info.name} active={domain}>
+  <main class="library-main"><section class="library-hero"><div class="library-category-head"><div><div class="library-eyebrow">{info.eyebrow}</div><h1>{info.name}</h1></div><CategoryContentEditor domain={domain} entries={entries} /></div><div class="library-subfilters"><button class="library-chip active" data-collection="all" type="button">すべて</button>{collections.map(([name]) => <button class="library-chip" data-collection={name} type="button">{name}</button>)}</div><div class="library-count" id="notes-count"></div></section>
+  <section class="library-collections">
+    {rootNotes.length > 0 && <details class="library-collection" data-collection-panel="__root__" open><summary><span class="library-collection-name">トップ</span><span class="library-collection-meta">{rootNotes.length} 項目</span></summary><div class="library-collection-notes">{rootNotes.map((item: any) => <div class="library-entry-shell" data-category-source={sourcePathFromEntry(item)}><a class="library-collection-note library-collection-entry" href={permalink(item)}><div><span class="library-note-kind">{noteKind(item) === '概要' ? 'ノート' : noteKind(item)}</span><strong>{item.data?.title}</strong><p>{item.data?.description}</p>{(item.data?.reviewed_at || item.data?.reviewed) && <span class="library-note-time">確認 {item.data?.reviewed_at || item.data?.reviewed}</span>}</div><span class="library-note-go">→</span></a><div class="library-entry-actions"><a class="library-entry-body-edit" data-category-body-edit href={bodyEditHref(item)} aria-label={`${item.data?.title}の本文を編集`}>本文編集</a><button class="library-entry-action" type="button" data-category-edit={sourcePathFromEntry(item)} aria-label={`${item.data?.title}のタイトル・情報を編集`}>タイトル編集</button></div></div>)}</div></details>}
+    {collections.map(([name, items], groupIndex) => {
+      const topItems = sortByOrder(items.filter((item: any) => !item.data?.directoryId));
+      return <details class="library-collection" data-collection-panel={name} open={groupIndex === 0}><summary><span class="library-collection-name">{name}</span><span class="library-collection-meta">{topItems.length} 項目</span></summary><div class="library-collection-notes">{topItems.map((item: any) => item.data?.type === 'Directory' ? (
+        <div class="library-entry-shell" data-category-source={sourcePathFromEntry(item)}><a class="library-directory-entry library-collection-entry" href={permalink(item)}><span class="library-directory-icon" aria-hidden="true"></span><div class="library-directory-copy"><span class="library-directory-label">DIRECTORY</span><strong>{item.data?.title}</strong><p>{item.data?.description}</p></div><span class="library-directory-meta">{domainEntries.filter((member: any) => member.data?.directoryId === item.data?.id).length} ノート <b>→</b></span></a><div class="library-entry-actions"><button class="library-entry-action" type="button" data-category-edit={sourcePathFromEntry(item)} aria-label={`${item.data?.title}の情報を編集`}>編集</button></div></div>
+      ) : (
+        <div class="library-entry-shell" data-category-source={sourcePathFromEntry(item)}><a class="library-collection-note library-collection-entry" href={permalink(item)}><div><span class="library-note-kind">{noteKind(item)}</span><strong>{item.data?.title}</strong><p>{item.data?.description}</p>{(item.data?.reviewed_at || item.data?.reviewed) && <span class="library-note-time">確認 {item.data?.reviewed_at || item.data?.reviewed}</span>}</div><span class="library-note-go">→</span></a><div class="library-entry-actions"><a class="library-entry-body-edit" data-category-body-edit href={bodyEditHref(item)} aria-label={`${item.data?.title}の本文を編集`}>本文編集</a><button class="library-entry-action" type="button" data-category-edit={sourcePathFromEntry(item)} aria-label={`${item.data?.title}のタイトル・情報を編集`}>タイトル編集</button></div></div>
+      ))}</div></details>;
+    })}
+  </section></main>
+  <script is:inline>
+    (()=>{const buttons=[...document.querySelectorAll('[data-collection]')],panels=[...document.querySelectorAll('[data-collection-panel]')],count=document.getElementById('notes-count');let current='all';function render(){let visible=0;buttons.forEach(b=>b.classList.toggle('active',b.dataset.collection===current));panels.forEach(panel=>{const show=current==='all'||panel.dataset.collectionPanel===current;panel.hidden=!show;if(show){visible+=panel.querySelectorAll('.library-collection-entry').length;if(current!=='all')panel.open=true;}});if(count)count.textContent=`${visible} 項目`;}buttons.forEach(b=>b.addEventListener('click',()=>{current=b.dataset.collection||'all';render()}));document.addEventListener('category-content-changed',render);render();})();
+  </script>
+</LibraryLayout>

@@ -1,0 +1,21 @@
+---
+import { getCollection, render } from 'astro:content';
+import ArticleLayout from '../layouts/ArticleLayout.astro';
+import { routeParam } from '../lib/content';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('content');
+  return entries
+    .filter((entry: any) => entry.data?.type !== 'Directory' && entry.data?.id && entry.data?.permalink)
+    .map((entry: any) => ({
+      params: { slug: routeParam(entry) },
+      props: { entry },
+    }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+<ArticleLayout entry={entry}>
+  <Content />
+</ArticleLayout>

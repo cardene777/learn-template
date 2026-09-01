@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Center Responsibility Template</title>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:24px;background:#e9e5db;color:#151515;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic UI","Yu Gothic","Noto Sans JP",sans-serif}.wrap{max-width:1180px;margin:0 auto;background:#f8f4ec;border:1px solid #cfc7b8;padding:14px;box-shadow:0 16px 40px rgba(43,36,24,.14)}.slide{display:block;width:100%;height:auto;background:#f3efe6;border:1px solid #cfc7b8}.headerLeft{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:18px;font-weight:850;fill:#151515;letter-spacing:.10em}.headerRight{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:17px;font-weight:750;fill:#8a857b;letter-spacing:.10em}.titleHtml{font-size:64px;font-weight:900;letter-spacing:-.055em;line-height:1.05;color:#151515;white-space:nowrap}.titleBand{display:inline;background:linear-gradient(to bottom,transparent 54%,rgba(217,199,149,.86) 54%,rgba(217,199,149,.86) 88%,transparent 88%);box-decoration-break:clone;-webkit-box-decoration-break:clone}.lead{font-size:25px;font-weight:600;fill:#26231f}.zoneLabel{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:15px;font-weight:850;fill:#a67804;letter-spacing:.16em}.zoneTitle{font-size:20px;font-weight:850;fill:#151515;letter-spacing:-.025em}.nodeTitle{font-size:23px;font-weight:900;fill:#151515;letter-spacing:-.035em}.nodeTitleCenter{font-size:26px;font-weight:950;fill:#151515;letter-spacing:-.04em}.nodeSub{font-size:16px;font-weight:650;fill:#625b53}.pathLabel{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:13px;font-weight:800;fill:#8a857b;letter-spacing:.08em}.caption{font-size:14px;font-weight:750;fill:#8a857b}.arrow{stroke:#666;stroke-width:2;fill:none;marker-end:url(#arrowGray)}.arrowGold{stroke:#a67804;stroke-width:2.2;fill:none;marker-end:url(#arrowGold)}.arrowRed{stroke:#9d3d34;stroke-width:2;fill:none;marker-end:url(#arrowRed)}.arrowGreen{stroke:#2c5d55;stroke-width:2;fill:none;marker-end:url(#arrowGreen)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<svg class="slide" viewBox="0 0 1600 900" role="img" aria-label="中心責務型">
+<defs>
+  <pattern id="hatchGold" patternUnits="userSpaceOnUse" width="10" height="10" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="10" stroke="#d9c795" stroke-width="1.2" opacity=".78"/></pattern>
+  <marker id="arrowGray" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth"><path d="M2,2 L10,6 L2,10" fill="none" stroke="#666" stroke-width="1.6"/></marker>
+  <marker id="arrowGold" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth"><path d="M2,2 L10,6 L2,10" fill="none" stroke="#a67804" stroke-width="1.6"/></marker>
+  <marker id="arrowRed" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth"><path d="M2,2 L10,6 L2,10" fill="none" stroke="#9d3d34" stroke-width="1.6"/></marker>
+  <marker id="arrowGreen" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth"><path d="M2,2 L10,6 L2,10" fill="none" stroke="#2c5d55" stroke-width="1.6"/></marker>
+</defs>
+<rect width="1600" height="900" fill="#f3efe6"/>
+<text x="80" y="72" class="headerLeft">{章番号} ／ {セクション名}</text>
+<text x="1520" y="72" class="headerRight" text-anchor="end">{ページ番号} / {総ページ数}</text>
+<line x1="80" y1="100" x2="1520" y2="100" stroke="#bdb4a5" stroke-width="1"/>
+<foreignObject x="80" y="128" width="1440" height="92"><div xmlns="http://www.w3.org/1999/xhtml" class="titleHtml"><span class="titleBand">{タイトル}</span></div></foreignObject>
+<text x="80" y="265" class="lead">{中心要素と周辺要素の関係を1文で説明するリード文}</text>
+<g id="content-region">
+  <rect x="80" y="315" width="360" height="505" fill="rgba(255,255,255,.10)" stroke="#d8d0c2" stroke-width="1.1"/>
+  <text x="110" y="350" class="zoneLabel">OUTSIDE</text><text x="110" y="382" class="zoneTitle">要求元</text>
+  <rect x="520" y="315" width="610" height="505" fill="none" stroke="#a67804" stroke-width="1.8" stroke-dasharray="7 6"/>
+  <text x="550" y="350" class="zoneLabel">CORE PROCESS</text><text x="550" y="382" class="zoneTitle">中心要素</text>
+  <rect x="1200" y="315" width="320" height="505" fill="rgba(255,255,255,.10)" stroke="#d8d0c2" stroke-width="1.1"/>
+  <text x="1230" y="350" class="zoneLabel">CONTROL</text><text x="1230" y="382" class="zoneTitle">評価と委譲</text>
+  <path data-from="a" data-to="c1" class="arrowRed"/><text data-label-for="a-c1" class="pathLabel" text-anchor="middle">SIGN REQ</text>
+  <path data-from="b" data-to="c2" class="arrow"/><text data-label-for="b-c2" class="pathLabel" text-anchor="middle">CONTEXT</text>
+  <path data-from="c1" data-to="d" class="arrowGold"/><text data-label-for="c1-d" class="pathLabel" text-anchor="middle">CHECK</text>
+  <path data-from="c2" data-to="e" class="arrowGreen"/><text data-label-for="c2-e" class="pathLabel" text-anchor="middle">SIGN ONLY</text>
+  <rect id="a" x="140" y="410" width="250" height="118" fill="rgba(255,255,255,.20)" stroke="#9d3d34" stroke-width="1.4"/><text x="164" y="446" class="nodeTitle">{外部要素A}</text><text x="164" y="478" class="nodeSub">{入力や要求}</text>
+  <rect id="b" x="140" y="600" width="250" height="118" fill="rgba(255,255,255,.20)" stroke="#c8bfae" stroke-width="1.4"/><text x="164" y="636" class="nodeTitle">{外部要素B}</text><text x="164" y="668" class="nodeSub">{補助する要求}</text>
+  <rect id="c1" x="675" y="410" width="300" height="118" fill="url(#hatchGold)" stroke="#a67804" stroke-width="1.6"/><text x="825" y="458" class="nodeTitleCenter" text-anchor="middle">{中心要素}</text><text x="825" y="492" class="nodeSub" text-anchor="middle">{中心要素の役割}</text>
+  <rect id="c2" x="675" y="600" width="300" height="118" fill="url(#hatchGold)" stroke="#a67804" stroke-width="1.6"/><text x="825" y="648" class="nodeTitleCenter" text-anchor="middle">{中心要素}</text><text x="825" y="682" class="nodeSub" text-anchor="middle">{分岐判断や処理}</text>
+  <path d="M825 528 L825 600" stroke="#a67804" stroke-width="1.5" stroke-dasharray="5 5" fill="none"/><text x="847" y="569" class="caption">same responsibility</text>
+  <rect id="d" x="1260" y="410" width="220" height="118" fill="rgba(255,255,255,.20)" stroke="#a67804" stroke-width="1.4"/><text x="1284" y="446" class="nodeTitle">{制御要素}</text><text x="1284" y="478" class="nodeSub">{評価や制御}</text>
+  <rect id="e" x="1260" y="600" width="220" height="118" fill="rgba(255,255,255,.20)" stroke="#2c5d55" stroke-width="1.4"/><text x="1284" y="636" class="nodeTitle">{委譲先}</text><text x="1284" y="668" class="nodeSub">{結果や実行先}</text>
+  <line x1="650" y1="760" x2="1000" y2="760" stroke="#d8d0c2" stroke-width="1"/>
+  <text x="665" y="790" class="caption">{中心要素は要求を受けて評価先と委譲先へ分ける}</text>
+</g>
+</svg>
+</div>
+<script>
+(function(){
+  const svg = document.querySelector('svg');
+  const box = id => { const e = document.getElementById(id); return {x:+e.getAttribute('x'), y:+e.getAttribute('y'), w:+e.getAttribute('width'), h:+e.getAttribute('height')}; };
+  const right = b => [b.x+b.w, b.y+b.h/2];
+  const left = b => [b.x, b.y+b.h/2];
+  document.querySelectorAll('path[data-from]').forEach(p => {
+    const a = box(p.dataset.from), b = box(p.dataset.to);
+    const s = right(a), e = left(b);
+    p.setAttribute('d', `M${s[0]} ${s[1]} L${e[0]} ${e[1]}`);
+    const label = document.querySelector(`[data-label-for="${p.dataset.from}-${p.dataset.to}"]`);
+    if(label){ label.setAttribute('x', (s[0]+e[0])/2); label.setAttribute('y', s[1]-18); }
+  });
+})();
+</script>
+</body>
+</html>

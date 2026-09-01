@@ -1,0 +1,29 @@
+---
+import { sourcePathFromEntry } from '../lib/content';
+import '../styles/article-body-editor.css';
+const { entry } = Astro.props;
+const sourcePath = sourcePathFromEntry(entry);
+---
+<section class="article-body-editor" id="article-body-editor" hidden aria-label="記事本文編集">
+  <div class="article-body-editor-inline-head">
+    <div><strong>本文編集</strong><span>Markdown</span></div>
+    <span class="article-body-editor-state" id="article-body-editor-state"></span>
+  </div>
+  <div class="article-body-editor-toolbar" role="toolbar" aria-label="Markdown編集ツール">
+    <button type="button" data-md-tool="h2" title="見出し2">H2</button>
+    <button type="button" data-md-tool="h3" title="見出し3">H3</button>
+    <button type="button" data-md-tool="bold" title="太字">太字</button>
+    <button type="button" data-md-tool="link" title="リンク">リンク</button>
+    <button type="button" data-md-tool="list" title="箇条書き">箇条書き</button>
+    <button type="button" data-md-tool="quote" title="引用">引用</button>
+    <button type="button" data-md-tool="code" title="インラインコード">code</button>
+    <button type="button" data-md-tool="codeblock" title="コードブロック">コードブロック</button>
+  </div>
+  <textarea class="article-body-editor-textarea" id="article-body-editor-textarea" spellcheck="false" aria-label="Markdown本文"></textarea>
+  <footer class="article-body-editor-footer">
+    <p id="article-body-editor-status">本文編集を開始すると元Markdownを読み込みます。</p>
+    <div><button class="article-body-editor-cancel" id="article-body-editor-cancel" type="button">キャンセル</button><button class="article-body-editor-save" id="article-body-editor-save" type="button" disabled>本文を保存</button></div>
+  </footer>
+</section>
+<script is:inline type="application/json" id="article-body-editor-data" set:html={JSON.stringify({ path: sourcePath }).replace(/</g,'\\u003c')}></script>
+<script>import '../scripts/article-body-editor.js';</script>

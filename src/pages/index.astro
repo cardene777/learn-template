@@ -1,0 +1,58 @@
+---
+import { getCollection } from 'astro:content';
+import LibraryLayout from '../layouts/LibraryLayout.astro';
+import { permalink, noteKind } from '../lib/content';
+const entries = (await getCollection('content')).filter((entry: any) => entry.data?.id);
+const notes = entries.filter((entry: any) => entry.data?.type !== 'Directory');
+const recent = [...notes].sort((a: any, b: any) => String(b.data?.reviewed_at || b.data?.reviewed || '').localeCompare(String(a.data?.reviewed_at || a.data?.reviewed || ''))).slice(0, 6);
+const searchItems = entries.map((entry: any) => ({
+  title: entry.data?.title || '',
+  description: entry.data?.description || '',
+  collection: entry.data?.collectionName || '',
+  domain: entry.data?.domainName || '',
+  body: entry.body || '',
+  url: permalink(entry),
+  type: entry.data?.type || 'Note',
+}));
+const searchJson = JSON.stringify(searchItems).replace(/</g, '\\u003c');
+---
+<LibraryLayout title="Learn" active="">
+  <main class="library-main">
+    <section class="library-hero"><div class="library-eyebrow">HOME</div><h1>技術をリサーチする。</h1>
+      <div class="library-search-wrap"><svg class="library-search-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input class="library-search" id="home-search" type="search" autocomplete="off" placeholder="ノートとDirectoryを検索 — AP2、DID、Payment Credential…" aria-label="ノートとDirectoryを検索"></div>
+      <div class="library-search-results" id="home-search-results"></div>
+    </section>
+    <section class="library-section"><div class="library-section-head"><h2>カテゴリから探す</h2></div><div class="library-category-grid">
+      <a class="library-category-card" href="/commerce/"><strong>コマース</strong><span>AgentがSellerのCommerce Stateを扱うProtocol。</span><b>ACP / UCP →</b></a>
+      <a class="library-category-card" href="/identity/"><strong>アイデンティティ</strong><span>Identifier、Credential、本人・Agent確認。</span><b>DID / VC / KYC / KYA →</b></a>
+      <a class="library-category-card" href="/payments/"><strong>決済</strong><span>Agent Payment、HTTP Payment、Payment Processor周辺。</span><b>AP2 / MPP / x402 →</b></a>
+    </div></section>
+    <section class="library-section"><div class="library-section-head"><h2>最近確認したノート</h2></div><div class="library-note-grid">
+      {recent.map((note: any) => <a class="library-note-card" href={permalink(note)}><span class="library-note-meta">{note.data?.collectionName} · {noteKind(note)}</span><strong>{note.data?.title}</strong><p>{note.data?.description}</p>{(note.data?.reviewed_at || note.data?.reviewed) && <span class="library-note-time">確認 {note.data?.reviewed_at || note.data?.reviewed}</span>}</a>)}
+    </div></section>
+  </main>
+  <script is:inline type="application/json" id="home-search-data" set:html={searchJson}></script>
+  <script is:inline>
+    (() => {
+      const input = document.getElementById('home-search');
+      const headerInput = document.getElementById('header-search-input');
+      const headerForm = document.getElementById('header-search-form');
+      const results = document.getElementById('home-search-results');
+      const data = document.getElementById('home-search-data');
+      if (!input || !results || !data) return;
+      const items = JSON.parse(data.textContent || '[]');
+      const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+      function render() {
+        const q = input.value.trim().toLowerCase();
+        if (!q) { results.classList.remove('visible'); results.innerHTML = ''; return; }
+        const matches = items.filter(item => `${item.title} ${item.description} ${item.collection} ${item.domain} ${item.body}`.toLowerCase().includes(q)).slice(0, 10);
+        results.classList.add('visible');
+        results.innerHTML = matches.length ? matches.map(item => `<a class="library-search-result" href="${item.url}"><span class="library-note-meta">${item.type === 'Directory' ? 'DIRECTORY · ' : ''}${esc(item.domain)} / ${esc(item.collection)}</span><strong>${esc(item.title)}</strong><p>${esc(item.description)}</p></a>`).join('') : '<div class="library-search-empty">一致する項目はありません。</div>';
+      }
+      input.addEventListener('input', render);
+      headerForm?.addEventListener('submit', event => { event.preventDefault(); input.value = headerInput?.value || ''; render(); input.focus(); input.scrollIntoView({behavior:'smooth',block:'center'}); });
+      const q = new URLSearchParams(location.search).get('q');
+      if (q) { input.value = q; if (headerInput) headerInput.value = q; render(); setTimeout(() => input.scrollIntoView({block:'center'}), 0); }
+    })();
+  </script>
+</LibraryLayout>
