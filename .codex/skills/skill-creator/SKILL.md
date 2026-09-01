@@ -47,12 +47,7 @@ Skill本体以外のファイルを理由なく増やさないでください。
 
 同じ責務を持つSkillが既にある場合は、新規Skillを増やすより既存Skillの改善を優先します。
 
-このrepositoryの文章生成・調査系Skillでは、必要に応じて次も確認します。
-
-```text
-.codex/skills/COMMON.md
-.codex/skills/MARKDOWN.md
-```
+既存Skillに共通ルールやreferenceがある場合は、必要なものだけ参照します。存在しない共通ファイルを前提にしないでください。
 
 既存ルールと矛盾する指示を新しいSkillへ複製しないでください。
 

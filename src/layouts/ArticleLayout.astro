@@ -36,7 +36,6 @@ const sourcePath = sourcePathFromEntry(entry);
   <script is:inline type="application/json" id="article-meta-json" set:html={JSON.stringify({ path: sourcePath }).replace(/</g, '\\u003c')}></script>
   <script>import '../scripts/article-runtime.js';</script>
   <script>import '../scripts/article-print.js';</script>
-  <script>import '../../assets/article-status.js';</script>
   <script>import '../../assets/article-outline.js';</script>
 </body>
 </html>

@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "このLearn Templateを自分用に作ってCloudflareへデプロイまでやって。できるところは全部やって。",
-      "expected_output": "Tool capabilityを確認し、利用者repositoryの作成・Secret設定・Deployを可能な範囲で自動実行する。Secret値をチャットへ要求せず、本人操作が必要な箇所だけCheckpointとして案内し、Deploymentと編集E2Eまで確認する。",
+      "expected_output": "Tool capabilityを確認し、Standard modeとしてBasic AuthとCloudflare Deployを進める。ユーザーが編集を求めていなければGitHub PATを要求しない。Secret値をチャットへ要求せず、本人操作が必要な箇所だけCheckpointとして案内する。",
       "files": ["docs/setup.md"]
     },
     {
@@ -15,8 +15,8 @@
     },
     {
       "id": 3,
-      "prompt": "前にCloudflareへ設定したGitHub tokenがあるはずだから、それ使ってデプロイして。",
-      "expected_output": "新規Token発行を即座に要求せず、既存Secretを再利用できる実装・設定を確認する。Secret値を読み出そうとせず、既存設定でWorkflow/編集APIを実行して検証する。",
+      "prompt": "前にCloudflareへ設定したGitHub tokenがあるはずだから、編集も使える状態でデプロイして。",
+      "expected_output": "Editing modeとして既存Secretを再利用できる実装・設定を確認する。新規Token発行を即座に要求せず、Secret値を読み出そうとせず、既存設定でWorkflow/編集APIを検証する。",
       "files": ["src/index.js", "docs/setup.md"]
     },
     {
@@ -24,6 +24,12 @@
       "prompt": "PATここに貼ればいい？",
       "expected_output": "PATを通常チャットへ貼らせず、GitHubまたはCloudflareのSecret入力UI/安全なSecret書き込み機構へ直接登録するよう案内する。Token値を回答へ再掲しない。",
       "files": ["docs/setup.md"]
+    },
+    {
+      "id": 5,
+      "prompt": "見るだけでいい。Basic Authは欲しいけどブラウザ編集はいらない。",
+      "expected_output": "WORKER_GITHUB_TOKENを要求せず、CLOUDFLARE_ACCOUNT_ID、CLOUDFLARE_API_TOKEN、WORKER_BASIC_USER、WORKER_BASIC_PASSWORDだけでStandard modeを進める。",
+      "files": ["docs/setup.md", ".github/workflows/deploy-cloudflare.yml"]
     }
   ]
 }
