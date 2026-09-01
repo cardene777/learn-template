@@ -9,7 +9,8 @@
     "prepare:astro": "node scripts/prepare-astro.mjs",
     "build": "npm run prepare:astro && astro build && rm -rf _site && cp -R dist _site",
     "dev": "npm run prepare:astro && astro dev",
-    "check": "npm run prepare:astro && astro check"
+    "check": "npm run prepare:astro && astro check",
+    "deploy:cloudflare": "node scripts/prepare-astro.mjs --deploy-cloudflare"
   },
   "dependencies": {
     "astro": "7.2.9",

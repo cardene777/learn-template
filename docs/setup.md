@@ -2,6 +2,26 @@
 
 このドキュメントは、Templateから自分のLearnを作り、Basic Auth付きでCloudflare Workersへデプロイするための手順です。
 
+## 最短ルート
+
+おすすめは**WranglerからCloudflareへ直接デプロイ**です。GitHub Actions用のCloudflare API Tokenを最初から用意する必要はありません。
+
+```text
+Use this template
+↓
+Cloudflareアカウント確認 / 作成
+↓
+Wrangler login
+↓
+Basic Auth Secretを安全に用意
+↓
+npm run deploy:cloudflare
+↓
+workers.dev
+```
+
+ブラウザ編集を使わない場合、GitHub PATは不要です。
+
 ## ChatGPTから進める
 
 このrepositoryにはセットアップ用Skillがあります。
@@ -17,134 +37,171 @@ ChatGPTへrepository URLと一緒に次のように依頼してください。
 https://github.com/<YOUR_NAME>/<YOUR_REPOSITORY>
 
 repository内の .codex/skills/learn-deployer/SKILL.md を使って、
-このLearnを自分用にセットアップしてCloudflareへデプロイまで進めて。
+Cloudflareアカウントの準備確認から始めて、使えるならWranglerで直接デプロイして。
 ```
 
-途中まで設定済みなら、次のように依頼すれば現在地から再開できます。
+`learn-deployer`は最初にCloudflareの準備状況を確認します。アカウントが無ければ、先にアカウント作成手順だけを表示します。
 
-```text
-learn-deployerを使って、現在の状態を確認してセットアップの続きを進めて。
-```
-
-GitHub PAT、Cloudflare API Token、Basic AuthのパスワードなどのSecret値は通常のチャットへ貼らないでください。
-
-## 構成
-
-初期状態のおすすめは次です。
-
-```text
-Basic Auth        ON
-ブラウザ編集      OFF
-Cloudflare Deploy ON
-```
-
-ブラウザ編集を使わない場合、GitHub PATは不要です。
+Secret値は通常のチャットへ貼らないでください。
 
 ## 1. Templateからrepositoryを作る
 
 Public Template repositoryで`Use this template`→`Create a new repository`を選びます。
 
-ノートを非公開にしたい場合は、作成先repositoryをPrivateにすることを推奨します。
+ノートを非公開にしたい場合はPrivate repositoryを推奨します。
 
-## 2. CloudflareのCredentialを用意する
+## 2. Cloudflareアカウントを準備する
 
-GitHub ActionsからCloudflare Workersへデプロイするため、次の2値が必要です。
+Cloudflareアカウントを持っていない場合は、先にCloudflareでアカウントを作成し、必要ならメール認証を完了してください。
+
+ChatGPTから進めている場合は、作成後に次だけ返せば十分です。
 
 ```text
-CLOUDFLARE_ACCOUNT_ID
-CLOUDFLARE_API_TOKEN
+作った
 ```
 
-Cloudflare API TokenはWorkersを編集できる必要最小限の権限にし、対象Accountへscopeを限定してください。
+CloudflareのPasswordや認証情報をチャットへ送らないでください。
 
-## 3. Basic Authを設定する
+## 3. WranglerでCloudflareへログインする
 
-Basic Authは標準で使います。
+Wranglerが使える環境では認証状態を確認できます。
 
-まずログイン用ユーザー名を決めます。ChatGPTからセットアップしている場合、ユーザー名は通常の会話で指定して構いません。
+```bash
+npx --yes wrangler@4.127.1 whoami
+```
 
-次にパスワードを決めます。**パスワードはチャットへ貼らず、GitHub Actions Secretへ直接登録してください。**
+未認証ならdevice loginを使います。
 
-自分のrepositoryで`Settings`→`Secrets and variables`→`Actions`→`Repository secrets`へ進み、次を登録します。
+```bash
+npx --yes wrangler@4.127.1 login --device
+```
 
-| Secret | 必須 | 用途 |
-| --- | --- | --- |
-| `CLOUDFLARE_ACCOUNT_ID` | 必須 | Cloudflare Account |
-| `CLOUDFLARE_API_TOKEN` | 必須 | Workerデプロイ |
-| `WORKER_BASIC_USER` | 初回セットアップでは必須 | Basic Authユーザー名 |
-| `WORKER_BASIC_PASSWORD` | 初回セットアップでは必須 | Basic Authパスワード |
+表示されたCloudflareの認証画面を開き、コードを承認します。
 
-`WORKER_BASIC_USER`と`WORKER_BASIC_PASSWORD`は必ず2つセットで登録します。
+`--device`が使えない環境では通常のOAuth loginを使います。
 
-WorkflowはCloudflare Worker Secretとして次の名前で保存します。
+```bash
+npx --yes wrangler@4.127.1 login
+```
+
+この経路ではGitHub Actions用の`CLOUDFLARE_ACCOUNT_ID`と`CLOUDFLARE_API_TOKEN`は不要です。
+
+## 4. Basic Authを用意する
+
+Basic Authは標準で有効にします。
+
+Worker Secret名は次です。
 
 ```text
 BASIC_USER
 BASIC_PASSWORD
 ```
 
-一度Cloudflare側へ保存された後の再デプロイでは、既存Secretをそのまま再利用できます。
+Passwordはチャットへ貼らないでください。
 
-## 4. ブラウザ編集を使う場合だけGitHub PATを設定する
+Cloudflare Secretを安全に書き込めるToolがある場合はそれを使います。無い場合は、ローカルでgitignore済みのSecret fileを作れます。
 
-本文編集・タイトル編集からGitHub repositoryへCommitしたい場合だけFine-grained PATを作ります。
-
-Repository accessは自分のLearn repositoryだけに限定し、Repository permissionsは最低限`Contents: Read and write`を付けます。
-
-発行したPATはチャットへ貼らず、GitHub Actions Secretへ直接登録します。
-
-| Secret | 必須 | 用途 |
-| --- | --- | --- |
-| `WORKER_GITHUB_TOKEN` | 編集する場合のみ | WorkerからGitHubへCommit |
-
-WorkflowはCloudflare Worker Secret `GITHUB_TOKEN`として保存します。
-
-編集を使わない場合、`WORKER_GITHUB_TOKEN`は設定しなくて構いません。
-
-## 5. Worker名を確認する
-
-デフォルトWorker名は`learn`です。
-
-同じCloudflare Accountですでに使われている場合は`wrangler.jsonc`の`name`を変更してください。
+例として`learn.secrets.json`を作り、値は自分の端末や安全な入力UIで直接入れます。
 
 ```json
 {
-  "name": "my-learn"
+  "BASIC_USER": "<username>",
+  "BASIC_PASSWORD": "<password>"
 }
 ```
 
-## 6. デプロイする
+`*.secrets.json`は`.gitignore`対象です。このファイルをCommitしないでください。
 
-GitHubの`Actions`→`Astro Cloudflare Deploy`→`Run workflow`を実行します。
+## 5. ブラウザ編集を使う場合だけGitHub PATを追加する
 
-Workflowは次だけを行います。
+本文編集・タイトル編集からGitHubへCommitしたい場合だけFine-grained PATを作ります。
 
-1. repository URLを現在のrepositoryへバインドする。
-2. 依存関係をインストールする。
-3. Astroをbuildする。
-4. 設定済みWorker SecretをCloudflareへ渡す。
-5. Cloudflare Workersへデプロイする。
+Repository accessは自分のLearn repositoryだけに限定し、最低限`Contents: Read and write`を付けます。
 
-Private開発元で行っているブラウザSmoke TestやPDF検証などはPublic Templateの通常デプロイでは実行しません。
+Secret file方式なら次のように追加します。
 
-## 7. 動作確認
+```json
+{
+  "BASIC_USER": "<username>",
+  "BASIC_PASSWORD": "<password>",
+  "GITHUB_TOKEN": "<fine-grained PAT>"
+}
+```
 
-デプロイ後は最低限、次を確認します。
+PAT値をチャットへ送らないでください。
+
+## 6. Worker名を確認する
+
+既定Worker名は`learn`です。
+
+既存Workerを上書きしたくない場合は、Sourceを書き換えずに一時的なWorker名を指定できます。
+
+```bash
+LEARN_WORKER_NAME=my-learn npm run deploy:cloudflare
+```
+
+## 7. 直接デプロイする
+
+依存関係を入れます。
+
+```bash
+npm install
+```
+
+通常はGitHub repositoryを`git remote origin`から自動判定します。
+
+Secret fileを使う場合:
+
+```bash
+LEARN_SECRETS_FILE=./learn.secrets.json npm run deploy:cloudflare
+```
+
+Worker名も指定する場合:
+
+```bash
+LEARN_WORKER_NAME=my-learn \
+LEARN_SECRETS_FILE=./learn.secrets.json \
+npm run deploy:cloudflare
+```
+
+repositoryを自動判定できない環境では明示できます。
+
+```bash
+LEARN_REPOSITORY=<YOUR_NAME>/<YOUR_REPOSITORY> \
+LEARN_SECRETS_FILE=./learn.secrets.json \
+npm run deploy:cloudflare
+```
+
+`deploy:cloudflare`は次を行います。
+
+1. GitHub repositoryを判定する。
+2. repository bindingをデプロイ中だけ一時適用する。
+3. 必要ならWorker名を一時変更する。
+4. Astroをbuildする。
+5. WranglerでCloudflare Workersへdeployする。
+6. デプロイ後にSourceを元へ戻す。
+
+Wranglerが表示したworkers.dev URLを使ってください。URLは推測しません。
+
+## 8. 動作確認
+
+最低限次を確認します。
 
 - workers.devまたはCustom Domainへアクセスできる。
-- Basic Authでログインできる。
-- デザインとサンプルノートが表示される。
+- Basic Authが有効。
+- 正しいCredentialでページが表示される。
 - ヘッダーのGitHubリンクが自分のrepositoryを指す。
 
-ブラウザ編集を有効にした場合だけ追加で確認します。
+編集を有効にした場合だけ追加で確認します。
 
 - `本文編集`でMarkdownを読み込める。
 - 保存すると自分のrepositoryへCommitされる。
-- Commit後にGitHub Actionsが再デプロイする。
 
-## Secret一覧
+## GitHub Actionsで自動デプロイしたい場合
 
-最小構成は4つです。
+pushごとに自動デプロイしたい場合は、同梱の`Astro Cloudflare Deploy`を使えます。
+
+この経路ではGitHub Actions Secretsとして次が必要です。
 
 ```text
 CLOUDFLARE_ACCOUNT_ID
@@ -153,11 +210,15 @@ WORKER_BASIC_USER
 WORKER_BASIC_PASSWORD
 ```
 
-編集を使う時だけ次を追加します。
+編集する場合だけ追加します。
 
 ```text
 WORKER_GITHUB_TOKEN
 ```
+
+Secret値はGitHubのSecret入力UIへ直接登録してください。
+
+**初回デプロイだけならWrangler直デプロイの方が設定項目が少ないため推奨です。**
 
 ## ローカル開発
 
@@ -166,15 +227,14 @@ npm install
 npm run dev
 ```
 
-`.env`、`.dev.vars`、TokenやPasswordを含むローカルファイルはCommitしないでください。
+`.env`、`.dev.vars`、`*.secrets.json`、TokenやPasswordを含むローカルファイルはCommitしないでください。
 
 ## 問題が起きた場合
 
 ChatGPTへrepository URLを渡し、次のように依頼できます。
 
 ```text
-このGitHub repositoryのCloudflareデプロイが失敗している。
-learn-deployerを使って原因を確認し、続きから直して。
+learn-deployerを使って現在のCloudflare認証・Worker・repository状態を確認し、失敗したところから直して。
 ```
 
-`learn-deployer`はWorkflow Runと失敗Stepを確認し、repository側で直せる問題は修正し、Credential入力など本人操作が必要な場合だけ現在のCheckpointを案内します。
+最初の手順を繰り返さず、現在の未完了Gateから再開します。
