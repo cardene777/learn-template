@@ -1,0 +1,36 @@
+name: Bootstrap sanitized Learn template
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/bootstrap-template.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout template repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          fetch-depth: 0
+
+      - name: Download verified sanitized export
+        run: |
+          curl --fail --location --retry 3 'https://sdmntprnznorth.oaiusercontent.com/files/00000000-39e8-820b-954a-2e148c7d5e84/raw?se=2026-09-01T14%3A03%3A43Z&sp=r&sv=2026-02-06&sr=b&scid=aaef84ff-b79c-521f-b6c4-b32526a45953&skoid=f5e14fda-2af7-44a3-9d18-d372ffcad871&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-31T22%3A18%3A48Z&ske=2026-09-01T22%3A18%3A48Z&sks=b&skv=2026-02-06&sig=B4ng%2BMUZRXXR5brygrSzAp/GtEK2OY6cCvUcA1n71ao%3D' -o /tmp/sanitized-learn-template.zip
+          echo '282f58710a01ac3ad36a465b2cc69fb5c36d3cb7bc7601a6b2e05f387546d669  /tmp/sanitized-learn-template.zip' | sha256sum --check
+
+      - name: Replace repository with sanitized tree
+        run: |
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          unzip -q /tmp/sanitized-learn-template.zip -d .
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "sync: initialize sanitized Learn template"
+          git push origin HEAD:main
