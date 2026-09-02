@@ -30,7 +30,8 @@ GitHub repository URLと一緒に次のように依頼できます。
 このGitHub repositoryを使ってください:
 https://github.com/<YOUR_NAME>/<YOUR_REPOSITORY>
 
-repository内の .codex/skills/learn-deployer/SKILL.md を使って、
+https://github.com/cardene777/learn-template
+上記のテンプレートrepository内の `.codex/skills/learn-deployer/SKILL.md` を使って、
 Cloudflareアカウントの準備確認から始めて、使えるならWranglerで直接デプロイして。
 ```
 
