@@ -31,7 +31,7 @@ jobs:
           cp /tmp/learn-template-dist/assets/article-overrides.css assets/article-overrides.css
           grep -q 'mermaid@11.17.2' src/scripts/article-runtime.js
           grep -q "SWIMLANE" src/scripts/article-runtime.js
-          grep -q "data.learnBlueprint='3'" src/scripts/article-runtime.js
+          grep -q "dataset.learnBlueprint='3'" src/scripts/article-runtime.js
           grep -q 'Mermaid Blueprint viewer v3' assets/article-overrides.css
           grep -q '#bfd8dd' assets/article-overrides.css
           grep -q '__LEARN_REPOSITORY__' src/scripts/article-runtime.js
