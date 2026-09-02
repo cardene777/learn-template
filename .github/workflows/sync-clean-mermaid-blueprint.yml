@@ -1,0 +1,46 @@
+name: Sync clean Mermaid Blueprint
+
+on:
+  push:
+    branches:
+      - sync/clean-mermaid-blueprint
+    paths:
+      - ".github/workflows/sync-clean-mermaid-blueprint.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: sync/clean-mermaid-blueprint
+          fetch-depth: 0
+      - name: Download verified distribution artifact
+        run: |
+          curl -fL 'https://sdmntprnznorth.oaiusercontent.com/files/00000000-1858-820b-b5fb-c9a9fb65e63c/raw?se=2026-09-02T08%3A13%3A58Z&sp=r&sv=2026-02-06&sr=b&scid=55c21ef5-80b7-58e0-b752-a9c4138798b8&skoid=f5e14fda-2af7-44a3-9d18-d372ffcad871&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-02T05%3A24%3A25Z&ske=2026-09-03T05%3A24%3A25Z&sks=b&skv=2026-02-06&sig=1jtU32WrjtpQv8aM%2BXNjgEW5LwrEuv97GkgnQ1yds50%3D' -o /tmp/template.zip
+          rm -rf /tmp/template-dist
+          mkdir -p /tmp/template-dist
+          unzip -q /tmp/template.zip -d /tmp/template-dist
+      - name: Apply exact verified renderer
+        run: |
+          cp /tmp/template-dist/src/scripts/article-runtime.js src/scripts/article-runtime.js
+          cp /tmp/template-dist/scripts/mermaid-blueprint-smoke.py scripts/mermaid-blueprint-smoke.py
+          grep -q 'padMermaidForeignObjects' src/scripts/article-runtime.js
+          ! grep -q "applyNodeBadges(svg,kind,profile.badge)" src/scripts/article-runtime.js
+          ! grep -q "if(kind==='FLOWCHART')addFlowAccent(svg)" src/scripts/article-runtime.js
+          grep -q '__LEARN_REPOSITORY__' src/scripts/article-runtime.js
+      - name: Build public template
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+      - name: Commit verified renderer
+        run: |
+          git config user.name cardene
+          git config user.email 61857866+cardene777@users.noreply.github.com
+          git add src/scripts/article-runtime.js scripts/mermaid-blueprint-smoke.py
+          git commit -m 'fix: clean up Mermaid Blueprint rendering [skip ci]'
+          git push origin HEAD:sync/clean-mermaid-blueprint
