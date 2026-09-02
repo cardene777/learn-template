@@ -17,7 +17,7 @@ async function getMermaid(){
   mermaidApi.initialize({
     startOnLoad:false,securityLevel:'strict',theme:'base',
     flowchart:{curve:'basis',htmlLabels:true,useMaxWidth:false,nodeSpacing:56,rankSpacing:64,padding:20},
-    sequence:{useMaxWidth:true,wrap:true,diagramMarginX:24,diagramMarginY:20,actorMargin:70,messageMargin:42},
+    sequence:{useMaxWidth:true,wrap:false,diagramMarginX:22,diagramMarginY:18,actorMargin:90,width:190,height:56,boxMargin:10,boxTextMargin:5,noteMargin:12,messageMargin:54,mirrorActors:false,bottomMarginAdj:1,actorFontSize:12,actorFontWeight:700,noteFontSize:11,noteFontWeight:600,messageFontSize:11,messageFontWeight:600,wrapPadding:6},
     architecture:{seed:1,randomize:false},cynefin:{seed:1},
     themeVariables:{
       fontFamily:'Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",Meiryo,sans-serif',fontSize:'15px',background:'#f4fafb',
@@ -40,6 +40,7 @@ const mermaidProfiles={
 };
 const mermaidBlueprintCss=`
 svg.mermaid-svg-blueprint{overflow:visible;background:transparent}
+svg.mermaid-svg-blueprint .learn-bp-badge,svg.mermaid-svg-blueprint .learn-bp-flow-accent{display:none!important}
 svg.mermaid-svg-blueprint text,svg.mermaid-svg-blueprint tspan,svg.mermaid-svg-blueprint .label,svg.mermaid-svg-blueprint .nodeLabel,svg.mermaid-svg-blueprint .edgeLabel,svg.mermaid-svg-blueprint .messageText,svg.mermaid-svg-blueprint .loopText,svg.mermaid-svg-blueprint .noteText,svg.mermaid-svg-blueprint .classTitle,svg.mermaid-svg-blueprint .entityLabel{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",Meiryo,sans-serif!important;fill:#1c343c!important;color:#1c343c!important;font-weight:650}
 svg.mermaid-svg-blueprint .node rect,svg.mermaid-svg-blueprint rect.actor,svg.mermaid-svg-blueprint rect.actor-top,svg.mermaid-svg-blueprint rect.actor-bottom,svg.mermaid-svg-blueprint rect.note,svg.mermaid-svg-blueprint .classGroup rect,svg.mermaid-svg-blueprint rect.entityBox,svg.mermaid-svg-blueprint .statediagram-state rect,svg.mermaid-svg-blueprint .stateGroup rect,svg.mermaid-svg-blueprint .mindmap-node rect,svg.mermaid-svg-blueprint .timeline-node rect,svg.mermaid-svg-blueprint .kanban-item rect,svg.mermaid-svg-blueprint .block rect{fill:#fbfefe!important;stroke:#8fb3ba!important;stroke-width:1.4px!important}
 svg.mermaid-svg-blueprint .node polygon,svg.mermaid-svg-blueprint .node circle,svg.mermaid-svg-blueprint .node ellipse,svg.mermaid-svg-blueprint .node path,svg.mermaid-svg-blueprint .statediagram-state circle,svg.mermaid-svg-blueprint .state-start,svg.mermaid-svg-blueprint .state-end{stroke:#8fb3ba!important;stroke-width:1.4px!important}
@@ -60,10 +61,26 @@ svg.mermaid-svg-blueprint .learn-bp-badge-text{font:800 7.5px Inter,-apple-syste
 svg.mermaid-svg-blueprint .learn-bp-pie-hole{fill:#f4fafb!important;stroke:#f9fcfd!important;stroke-width:2.5px!important}
 svg.mermaid-svg-blueprint .learn-bp-pie-total{font:900 16px Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;fill:#1c343c!important}
 svg.mermaid-svg-blueprint .learn-bp-pie-caption{font:800 7px Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;letter-spacing:.08em!important;fill:#60767d!important}
-svg.mermaid-svg-blueprint foreignObject>div{color:#1c343c!important;line-height:1.35}
+svg.mermaid-svg-blueprint foreignObject{overflow:visible!important}\nsvg.mermaid-svg-blueprint foreignObject,svg.mermaid-svg-blueprint foreignObject *,svg.mermaid-svg-blueprint text,svg.mermaid-svg-blueprint tspan{opacity:1!important;visibility:visible!important}\nsvg.mermaid-svg-blueprint foreignObject>div{color:#1c343c!important;line-height:1.35}
+svg.mermaid-svg-sequence text.actor,svg.mermaid-svg-sequence .actor text,svg.mermaid-svg-sequence .actor tspan,svg.mermaid-svg-sequence .actor foreignObject,svg.mermaid-svg-sequence .actor foreignObject *{font-size:11.5px!important;font-weight:700!important;line-height:1.22!important}
+svg.mermaid-svg-sequence .messageText,svg.mermaid-svg-sequence .messageText tspan,svg.mermaid-svg-sequence .messageText foreignObject,svg.mermaid-svg-sequence .messageText foreignObject *{font-size:10.5px!important;font-weight:600!important;line-height:1.3!important}
+svg.mermaid-svg-sequence .noteText,svg.mermaid-svg-sequence .noteText tspan,svg.mermaid-svg-sequence .noteText foreignObject,svg.mermaid-svg-sequence .noteText foreignObject *{font-size:10.5px!important;font-weight:600!important;line-height:1.3!important}
+svg.mermaid-svg-sequence .messageText{paint-order:stroke fill;stroke:#f4fafb!important;stroke-width:4px!important;stroke-linejoin:round!important}
+svg.mermaid-svg-sequence .actor-line{stroke:#9eb8bd!important;stroke-width:1.25px!important;stroke-dasharray:5 5}
 `;
 function svgEl(name,attrs={}){const el=document.createElementNS(svgNS,name);for(const [key,value] of Object.entries(attrs))el.setAttribute(key,String(value));return el}
 function numberAttr(el,name,fallback=0){const value=parseFloat(el?.getAttribute(name)||'');return Number.isFinite(value)?value:fallback}
+function padMermaidForeignObjects(svg){
+  for(const fo of svg.querySelectorAll('foreignObject')){
+    if(fo.closest('defs')||fo.dataset.learnLabelPad==='1')continue;
+    const x=parseFloat(fo.getAttribute('x')||''),y=parseFloat(fo.getAttribute('y')||''),width=parseFloat(fo.getAttribute('width')||''),height=parseFloat(fo.getAttribute('height')||'');
+    if(Number.isFinite(x)&&Number.isFinite(width)){fo.setAttribute('x',String(x-10));fo.setAttribute('width',String(width+20))}
+    if(Number.isFinite(y)&&Number.isFinite(height)){fo.setAttribute('y',String(y-2));fo.setAttribute('height',String(height+4))}
+    fo.style.setProperty('overflow','visible','important');
+    const child=fo.firstElementChild;if(child)child.style.setProperty('overflow','visible','important');
+    fo.dataset.learnLabelPad='1';
+  }
+}
 function isBackgroundRect(rect){const cls=`${rect.getAttribute('class')||''} ${rect.parentElement?.getAttribute('class')||''}`;const width=numberAttr(rect,'width'),height=numberAttr(rect,'height');return /background|grid|plot/i.test(cls)&&(width>300||height>220)}
 function largestRect(group){const rects=[...group.querySelectorAll(':scope > rect,rect')].filter(rect=>!rect.closest('defs')&&!isBackgroundRect(rect));return rects.sort((a,b)=>numberAttr(b,'width')*numberAttr(b,'height')-numberAttr(a,'width')*numberAttr(a,'height'))[0]||null}
 function addBadge(group,rect,label){if(!group||!rect||group.querySelector(':scope > .learn-bp-badge'))return;const x=numberAttr(rect,'x'),y=numberAttr(rect,'y'),width=numberAttr(rect,'width');if(width<54)return;const badgeWidth=Math.max(38,Math.min(78,label.length*5.2+18));const g=svgEl('g',{class:'learn-bp-badge','aria-hidden':'true'});const bg=svgEl('rect',{class:'learn-bp-badge-bg',x:x+10,y:y-7,width:badgeWidth,height:16,rx:8,ry:8});const dot=svgEl('circle',{class:'learn-bp-badge-dot',cx:x+18,cy:y+1,r:2.6});const text=svgEl('text',{class:'learn-bp-badge-text',x:x+25,y:y+4});text.textContent=label;g.append(bg,dot,text);group.appendChild(g)}
@@ -136,7 +153,7 @@ function stabilizeMermaidLayout(box,svg,kind){
     delete box.dataset.layoutMode;
   }
 }
-function applyMermaidBlueprint(svg,kind){if(!svg||svg.dataset.learnBlueprint==='3')return;svg.dataset.learnBlueprint='3';const profile=mermaidProfiles[kind]||mermaidProfiles.DIAGRAM;const slug=String(kind||'diagram').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');svg.classList.add('mermaid-svg-blueprint',`mermaid-svg-${slug||'diagram'}`);svg.setAttribute('preserveAspectRatio','xMidYMid meet');let defs=svg.querySelector(':scope > defs');if(!defs){defs=svgEl('defs');svg.insertBefore(defs,svg.firstChild)}const style=svgEl('style');style.textContent=mermaidBlueprintCss;defs.appendChild(style);const shadowId=addShadow(svg);applyRadius(svg,profile.radius);applyNodeBadges(svg,kind,profile.badge);if(kind==='FLOWCHART')addFlowAccent(svg);
+function applyMermaidBlueprint(svg,kind){if(!svg||svg.dataset.learnBlueprint==='3')return;svg.dataset.learnBlueprint='3';const profile=mermaidProfiles[kind]||mermaidProfiles.DIAGRAM;const slug=String(kind||'diagram').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');svg.classList.add('mermaid-svg-blueprint',`mermaid-svg-${slug||'diagram'}`);svg.setAttribute('preserveAspectRatio','xMidYMid meet');let defs=svg.querySelector(':scope > defs');if(!defs){defs=svgEl('defs');svg.insertBefore(defs,svg.firstChild)}const style=svgEl('style');style.textContent=mermaidBlueprintCss;defs.appendChild(style);const shadowId=addShadow(svg);applyRadius(svg,profile.radius);padMermaidForeignObjects(svg);
   const shadowSelectors='.node rect,rect.actor,rect.note,.classGroup rect,rect.entityBox,.statediagram-state rect,.stateGroup rect,.mindmap-node rect,.timeline-node rect,.kanban-item rect,.block rect';for(const shape of svg.querySelectorAll(shadowSelectors)){if(!shape.closest('defs'))shape.setAttribute('filter',`url(#${shadowId})`)}
   if(kind==='FLOWCHART'||kind==='SWIMLANE'){for(const rect of svg.querySelectorAll('.node rect')){rect.setAttribute('rx','16');rect.setAttribute('ry','16')}}
   if(kind==='STATE'){for(const rect of svg.querySelectorAll('.node rect,.statediagram-state rect,.stateGroup rect')){rect.setAttribute('rx','16');rect.setAttribute('ry','16')}}
