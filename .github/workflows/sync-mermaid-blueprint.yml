@@ -1,0 +1,33 @@
+name: Sync Mermaid Blueprint
+
+on:
+  push:
+    branches:
+      - sync/mermaid-blueprint
+    paths:
+      - ".github/workflows/sync-mermaid-blueprint.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: sync/mermaid-blueprint
+          fetch-depth: 0
+      - name: Apply Blueprint patch
+        run: python3 .github/patch_mermaid_blueprint.py
+      - name: Remove temporary sync files
+        run: |
+          rm -f .github/patch_mermaid_blueprint.py
+          rm -f .github/workflows/sync-mermaid-blueprint.yml
+      - name: Commit Blueprint sync
+        run: |
+          git config user.name cardene
+          git config user.email 61857866+cardene777@users.noreply.github.com
+          git add -A
+          git commit -m "feat: sync Blueprint Mermaid design [skip ci]"
+          git push origin HEAD:sync/mermaid-blueprint
