@@ -51,7 +51,11 @@ Secret値は通常のチャットへ貼らないでください。
 
 ## ChatGPTからノートを作成する
 
-ノート作成Skillは、基本的に**このチャットで話し合った内容をそのままノートへ残す**ために使います。ノートの配置、frontmatter、検証、repositoryへの反映はSkill側に任せるため、依頼文で細かく指定する必要はありません。
+ノート作成用Skillは[Overview Note](.codex/skills/overview-note/SKILL.md)と[Mechanism Note](.codex/skills/mechanism-note/SKILL.md)です。
+
+通常はSkill名を指定する必要はありません。各Skillの`description`に書かれたTriggerから、依頼内容に合うSkillを自動選択します。
+
+ノートの配置、frontmatter、検証、repositoryへのCommitはSkill側に任せるため、利用者は**このチャットで何をノートに残したいか**だけを伝えます。
 
 最初に対象repositoryだけ指定します。
 
@@ -62,33 +66,51 @@ https://github.com/<YOUR_NAME>/<YOUR_REPOSITORY>
 
 ### 概要ノートを作る
 
-会話で話したテーマの全体像、目的、主要な概念を整理したい場合に使います。
+会話で話したテーマの全体像、目的、主要な概念を整理したい場合は、次のように依頼します。
 
 ```text
-概要ノート作成Skillを使って、この会話で話した「〇〇」についてまとめてください。
+この会話で話した「〇〇」について概要ノートにまとめてください。
 ```
 
 会話全体を対象にする場合は、さらに短くできます。
 
 ```text
-概要ノート作成Skillを使って、この会話で話した内容をまとめてください。
+この会話で話した内容を概要ノートにまとめてください。
 ```
+
+この依頼は`overview-note`が対象です。
 
 ### 仕組みノートを作る
 
-会話で話したテーマの内部構造、処理フロー、コンポーネント同士の関係を整理したい場合に使います。
+会話で話したテーマの内部構造、処理フロー、コンポーネント同士の関係を整理したい場合は、次のように依頼します。
 
 ```text
-仕組みノート作成Skillを使って、この会話で話した「〇〇」の仕組みについてまとめてください。
+この会話で話した「〇〇」の仕組みをノートにまとめてください。
 ```
+
+この依頼は`mechanism-note`が対象です。
 
 ### 概要ノートと仕組みノートを両方作る
 
-同じテーマについて全体像と内部構造を分けて残したい場合に使います。
+同じテーマについて全体像と内部構造を分けて残したい場合は、次のように依頼します。
 
 ```text
-概要ノート作成Skillと仕組みノート作成Skillを使って、
-この会話で話した「〇〇」についてそれぞれまとめてください。
+この会話で話した「〇〇」について、
+概要ノートと仕組みノートをそれぞれ作ってください。
+```
+
+この場合は`overview-note`と`mechanism-note`を併用します。
+
+### Skillを明示して呼び出す
+
+Skillを明示したい場合だけ、実際のSkill名を指定します。
+
+```text
+overview-note Skillを使って、この会話で話した「〇〇」についてまとめてください。
+```
+
+```text
+mechanism-note Skillを使って、この会話で話した「〇〇」の仕組みについてまとめてください。
 ```
 
 参考URLや追加資料がある場合だけ、これらの依頼文の後ろへ追加します。
@@ -104,7 +126,9 @@ https://github.com/<YOUR_NAME>/<YOUR_REPOSITORY>
 
 ## Skills
 
-Public Templateに含めるSkillは2つだけです。
+Public Templateに含めるSkillは4つです。
 
 - [Learn Deployer](.codex/skills/learn-deployer/SKILL.md): ChatGPT Desktop / Plugin準備、Cloudflare準備、直接デプロイ、自動デプロイ、失敗復旧
+- [Overview Note](.codex/skills/overview-note/SKILL.md): 会話内容から全体像、目的、主要概念を概要ノートとして保存
+- [Mechanism Note](.codex/skills/mechanism-note/SKILL.md): 会話内容から内部構造、処理フロー、コンポーネント関係を仕組みノートとして保存
 - [Skill Creator](.codex/skills/skill-creator/SKILL.md): このrepository用の新しいSkillを作成・改善
