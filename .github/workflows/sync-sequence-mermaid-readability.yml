@@ -1,0 +1,45 @@
+name: Sync Sequence Mermaid readability
+
+on:
+  push:
+    branches:
+      - sync/sequence-mermaid-readability
+    paths:
+      - ".github/workflows/sync-sequence-mermaid-readability.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: sync/sequence-mermaid-readability
+          fetch-depth: 0
+      - name: Download sanitized private distribution
+        run: |
+          curl -fL 'https://sdmntprcentralus.oaiusercontent.com/files/00000000-85bc-81f5-8473-36c15b159dfb/raw?se=2026-09-02T08%3A48%3A27Z&sp=r&sv=2026-02-06&sr=b&scid=0349f64a-d149-5712-8abe-7d9a3d6ac770&skoid=f5e14fda-2af7-44a3-9d18-d372ffcad871&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-01T23%3A31%3A24Z&ske=2026-09-02T23%3A31%3A24Z&sks=b&skv=2026-02-06&sig=DGCrFD7sYoshrUdwJswoMkJ0kMfB1pxJ1KctCRknwaQ%3D' -o /tmp/template.zip
+          rm -rf /tmp/template-dist
+          mkdir -p /tmp/template-dist
+          unzip -q /tmp/template.zip -d /tmp/template-dist
+      - name: Copy exact renderer
+        run: |
+          cp /tmp/template-dist/src/scripts/article-runtime.js src/scripts/article-runtime.js
+          grep -F 'actorMargin:90,width:190,height:56' src/scripts/article-runtime.js
+          grep -F 'font-size:10.5px' src/scripts/article-runtime.js
+          grep -F '__LEARN_REPOSITORY__' src/scripts/article-runtime.js
+          node --check src/scripts/article-runtime.js
+      - name: Build public template
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+      - name: Commit renderer
+        run: |
+          git config user.name cardene
+          git config user.email 61857866+cardene777@users.noreply.github.com
+          git add src/scripts/article-runtime.js
+          git commit -m 'fix: tune Mermaid sequence readability [skip ci]'
+          git push origin HEAD:sync/sequence-mermaid-readability
