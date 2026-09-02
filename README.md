@@ -24,6 +24,16 @@ GitHub Actions用のCloudflare API Tokenは、初回の直接デプロイでは�
 
 セットアップ専用Skillは[Learn Deployer](.codex/skills/learn-deployer/SKILL.md)です。
 
+このTemplateでは、**ChatGPTデスクトップアプリから実行することを推奨**します。GitHubやCloudflareのPlugin / Connector、Wranglerを利用できる環境を優先して、ChatGPTにできる操作はそのまま実行させます。
+
+デプロイを始める前に、ChatGPTで次の連携を準備してください。
+
+1. GitHub Plugin / Connectorを追加して、対象repositoryへアクセスできる状態にする。
+2. Cloudflare Plugin / Connectorが利用可能な環境では追加して、Cloudflareアカウントへ接続する。
+3. Cloudflare Plugin / ConnectorがChatGPT内で見つからない場合は、そのまま進める。`learn-deployer`がWrangler OAuth / device loginへfallbackする。
+
+チャット内からPlugin追加UIを表示できる環境では、`learn-deployer`がGitHubとCloudflareを検索し、未接続の連携をチャット内で追加できるよう案内します。ChatGPT内で追加できない場合だけ、Plugin一覧から手動で追加します。
+
 GitHub repository URLと一緒に次のように依頼できます。
 
 ```text
@@ -32,7 +42,7 @@ https://github.com/<YOUR_NAME>/<YOUR_REPOSITORY>
 
 https://github.com/cardene777/learn-template
 上記のテンプレートrepository内の `.codex/skills/learn-deployer/SKILL.md` を使って、
-Cloudflareアカウントの準備確認から始めて、使えるならWranglerで直接デプロイして。
+ChatGPT Desktop / Pluginの準備確認から始めて、Cloudflareへデプロイして。
 ```
 
 Cloudflareアカウントが無ければ、`learn-deployer`がデプロイ前にアカウント作成手順を表示します。Wranglerのdevice loginが使える環境では、API Tokenを発行せずOAuth認証で進めます。
@@ -52,5 +62,5 @@ Secret値は通常のチャットへ貼らないでください。
 
 Public Templateに含めるSkillは2つだけです。
 
-- [Learn Deployer](.codex/skills/learn-deployer/SKILL.md): Cloudflare準備、直接デプロイ、自動デプロイ、失敗復旧
+- [Learn Deployer](.codex/skills/learn-deployer/SKILL.md): ChatGPT Desktop / Plugin準備、Cloudflare準備、直接デプロイ、自動デプロイ、失敗復旧
 - [Skill Creator](.codex/skills/skill-creator/SKILL.md): このrepository用の新しいSkillを作成・改善
