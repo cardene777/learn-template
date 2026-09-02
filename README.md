@@ -49,6 +49,22 @@ Cloudflareアカウントが無ければ、`learn-deployer`がデプロイ前に
 
 Secret値は通常のチャットへ貼らないでください。
 
+## ChatGPTからノートを作成する
+
+ノート作成専用Skillを追加したrepositoryでは、GitHub Plugin / Connectorで対象repositoryへアクセスできる状態にして、次のように依頼できます。
+
+```text
+このGitHub repositoryを使ってください:
+https://github.com/<YOUR_NAME>/<YOUR_REPOSITORY>
+
+このrepositoryで利用できるノート作成Skillを使って、
+「Solidityのdelegatecall」について学習ノートを作成して。
+既存の `contents/` 構成とfrontmatterを確認し、適切なカテゴリとコレクションへMarkdownを追加して、
+必要な検証を行ったうえでrepositoryへCommitして。
+```
+
+テーマ部分を自分が学びたい内容へ置き換えて使います。参考URLや資料がある場合は、同じ依頼文へ追加してください。
+
 ## Default
 
 - Basic Auth: ON
