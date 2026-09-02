@@ -1,11 +1,11 @@
 ---
 name: learn-deployer
-description: Learn TemplateをChatGPT/AIからセットアップし、Cloudflareアカウント準備、Wrangler認証、Basic Auth、Cloudflare Workersへの直接デプロイ、必要に応じたGitHub Actions自動デプロイ、失敗復旧まで進めるSkill。「Learnをセットアップして」「このTemplateをCloudflareへデプロイして」「Cloudflareアカウントから準備して」「セットアップの続き」「デプロイが失敗したので直して」などで使用する。ブラウザ編集は任意で、必要な場合だけGitHub PATを設定する。
+description: Learn TemplateをChatGPT/AIからセットアップし、ChatGPT DesktopとGitHub / Cloudflare Pluginの準備確認、Cloudflareアカウント準備、Wrangler認証、Basic Auth、Cloudflare Workersへの直接デプロイ、必要に応じたGitHub Actions自動デプロイ、失敗復旧まで進めるSkill。「Learnをセットアップして」「このTemplateをCloudflareへデプロイして」「Cloudflareアカウントから準備して」「セットアップの続き」「デプロイが失敗したので直して」などで使用する。ブラウザ編集は任意で、必要な場合だけGitHub PATを設定する。
 ---
 
 # Learn Deployer
 
-Learn TemplateをCloudflare Workersへセットアップします。**最短でデプロイできる経路を優先**し、Toolで実行できる操作は自動実行します。本人操作が必要な箇所だけCheckpointとして案内します。
+Learn TemplateをCloudflare Workersへセットアップします。**ChatGPTデスクトップアプリからの実行を推奨**し、最短でデプロイできる経路を優先します。Toolで実行できる操作は自動実行し、本人操作が必要な箇所だけCheckpointとして案内します。
 
 人間向けSource of Truthは`docs/setup.md`です。Secret名や実装が不明な場合は、記憶ではなく`docs/setup.md`、`wrangler.jsonc`、`src/index.js`、現在のWorkflowを確認してください。
 
@@ -18,6 +18,36 @@ Learn TemplateをCloudflare Workersへセットアップします。**最短で�
 - GitHub Actions: 自動デプロイが必要な場合のfallback
 
 編集を使わない利用者へGitHub PATを要求しないでください。
+
+## Preflight. ChatGPT DesktopとPluginを確認する
+
+デプロイ工程へ入る前に、ChatGPTの実行環境と外部サービス連携を確認します。
+
+### ChatGPT Desktopを推奨する
+
+このTemplateではChatGPTデスクトップアプリからの実行を推奨します。ユーザーがWeb版など別の環境を使っていても、それだけを理由に処理を止めてはいけません。利用可能なToolとConnectorで続行できる場合はそのまま進めます。
+
+### GitHub Plugin / Connectorを確認する
+
+GitHub repositoryを操作するため、GitHub Plugin / Connectorが利用可能か確認します。
+
+1. 既にGitHubへ接続済みなら、その接続を使って対象repositoryを取得する。
+2. Plugin管理Toolが使える場合は、未接続のGitHub Pluginを検索する。
+3. チャット内でPlugin追加UIを提示できる場合は、設定画面へ誘導する前にチャット内で追加・接続できるよう提示する。
+4. チャット内追加ができない場合だけ、ChatGPTのPlugin一覧からGitHubを検索して追加するCheckpointを案内する。
+5. 接続済みであることを確認できるまで、接続済みと断定しない。
+
+### Cloudflare Plugin / Connectorを確認する
+
+Cloudflareを直接操作できるPlugin / ConnectorがあればWranglerより優先できるため、デプロイ開始前に利用可否を確認します。
+
+1. 既にCloudflareへ接続済みなら、その接続を利用する。
+2. Plugin管理Toolが使える場合はCloudflareを検索する。
+3. チャット内でCloudflare Plugin追加UIを提示できる場合は、そのUIから追加・接続できるよう提示する。
+4. Cloudflare Plugin / ConnectorがPlugin一覧に存在するがチャット内追加できない場合だけ、ChatGPTのPlugin一覧からCloudflareを追加するCheckpointを案内する。
+5. Cloudflare Plugin / Connector自体が現在の環境で提供されていない、検索結果に出ない、または利用できない場合はセットアップを止めない。Wrangler OAuth / device loginへfallbackする。
+
+GitHubとCloudflareのPlugin検索・追加をユーザーへ丸投げしないでください。Plugin管理Toolがある場合は、まずToolで検索し、チャット内追加を使えるか確認してください。
 
 ## Deployment Pathの優先順位
 
