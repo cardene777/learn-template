@@ -2,6 +2,10 @@
 
 GitHub上のMarkdownをSource of Truthとして管理し、Astroで生成してCloudflare Workersへデプロイする個人用ナレッジベースTemplateです。
 
+## 動作サンプル
+
+https://learn-template-test.cardene777.workers.dev/
+
 ## 最短セットアップ
 
 初回デプロイは**WranglerからCloudflareへ直接デプロイ**するのが最短です。
